@@ -2,6 +2,7 @@ import Validations
 import XCTest
 
 final class ValidationsTests: XCTestCase {
-    func testA() throws {
+    func testValidations() throws {
+        // TODO: implement
     }
 }

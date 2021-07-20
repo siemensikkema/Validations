@@ -2,69 +2,33 @@ import Decoded
 import XCTest
 
 final class DecodedTests: XCTestCase {
-    func testA() throws {
-        struct User: Decodable {
+    func test_singleValue() throws {
+        let decoded = try decode("1", as: Int.self)
+        XCTAssertEqual(decoded.codingPath, [])
+        XCTAssertEqual(decoded.state, .value(1))
+    }
+
+    func test_nilValue() throws {
+        let decoded = try decode("null", as: Int.self)
+        XCTAssertEqual(decoded.codingPath, [])
+        XCTAssertEqual(decoded.state, .nil)
+    }
+
+    func test_typeMismatch() throws {
+        let decoded = try decode("1", as: String.self)
+        XCTAssertEqual(decoded.codingPath, [])
+        XCTAssertEqual(decoded.state, .typeMismatch("Expected to decode String but found a number instead."))
+    }
+
+    func test_absent() throws {
+        struct Gadget: Decodable, Equatable {
             let name: Decoded<String>
         }
-        let payload = """
-        { "name": "a" }
-        """
-        let decoder = JSONDecoder()
-        let user = try decoder.decode(Decoded<User>.self, from: payload.data(using: .utf8)!)
+        let decoded = try decode("{}", as: Gadget.self)
+        XCTAssertEqual(decoded.codingPath, [])
 
-
-        user.
-
-        let keyedErrors = user.keyedErrors()
-        XCTAssertFalse(keyedErrors.isEmpty)
-        print(keyedErrors)
+        let decodedName = try decoded.state.requireValue().name
+        XCTAssertEqual(decodedName.codingPath, [.init(stringValue: "name")])
+        XCTAssertEqual(decodedName.state, .absent)
     }
 }
-
-
-//import Validations
-//import XCTest
-//
-//struct U: Decodable {
-//    let tag: Decoded<String>
-//}
-//struct T: Decodable {
-//    let tag: Decoded<String>
-//    let u: Decoded<U>
-//}
-//struct S: Decodable {
-//    let tag: Decoded<String>
-//    let t: Decoded<T>
-//}
-//
-//final class ValidationsTests: XCTestCase {
-//    let decoder = JSONDecoder()
-//
-//    func decode<T: Decodable>(_: T.Type = T.self, from string: String) throws -> Validated<Decoded<T>> {
-//        try decoder.decode(Decoded<T>.self, from: string.data(using: .utf8)!).validations.validated()
-//    }
-//
-//    func decode<T: Validatable>(_: T.Type = T.self, from string: String) throws -> Validated<T> {
-//        try decoder.decode(T.self, from: string.data(using: .utf8)!).validations.validated()
-//    }
-//
-//    func testValidatedMemberAccess() throws {
-//        XCTAssertEqual(try decode(Int.self, from: "1").value, 1)
-//        XCTAssertEqual(try decode([Decoded<Int>].self, from: "[1]")[0].value, 1)
-//
-//        let s = try decode(S.self, from: """
-//        {
-//            "tag": "a",
-//            "t": { "tag": "b", "u": { "tag": "c" } }
-//        }
-//        """)
-//
-//        XCTAssertEqual(s.tag.value, "a")
-//        XCTAssertEqual(s.t.tag.value, "b")
-//        XCTAssertEqual(s.t.u.tag.value, "c")
-//    }
-//
-//    func testA() {
-//
-//    }
-//}

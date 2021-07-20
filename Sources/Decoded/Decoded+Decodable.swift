@@ -1,3 +1,10 @@
+extension Decoded: Decodable where T: Decodable {
+    public init(from decoder: Decoder) throws {
+        codingPath = decoder.codingPath.map(AnyCodingKey.init)
+        state = try .init(from: decoder)
+    }
+}
+
 extension State: Decodable where T: Decodable {
     public init(from decoder: Decoder) throws {
         do {
@@ -9,20 +16,13 @@ extension State: Decodable where T: Decodable {
     }
 }
 
-extension Decoded: Decodable where T: Decodable {
-    public init(from decoder: Decoder) throws {
-        codingPath = decoder.codingPath.map(BasicCodingKey.init)
-        state = try .init(from: decoder)
-    }
-}
-
 public extension KeyedDecodingContainer {
     func decode<T: Decodable>(
         _ type: Decoded<T>.Type,
         forKey key: Key
     ) throws -> Decoded<T> {
         .init(
-            codingPath: (codingPath + [key]).map(BasicCodingKey.init),
+            codingPath: (codingPath + [key]).map(AnyCodingKey.init),
             state: try decodeIfPresent(State<T>.self, forKey: key) ?? (contains(key) ? .nil : .absent)
         )
     }

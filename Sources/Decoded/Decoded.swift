@@ -1,11 +1,6 @@
-public enum State<T> {
-    case absent
-    case `nil`
-    case value(T)
-    case typeMismatch(String)
-}
-
 public struct Decoded<T> {
-    public let codingPath: [BasicCodingKey]
+    public let codingPath: [AnyCodingKey]
     public let state: State<T>
 }
+
+extension Decoded: Equatable where T: Equatable {}

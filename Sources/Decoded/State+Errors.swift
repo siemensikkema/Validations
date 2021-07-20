@@ -1,5 +1,3 @@
-import Decoded
-
 public extension State {
     struct Nil: Error {}
     struct Absent: Error {}
