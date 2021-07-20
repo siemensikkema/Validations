@@ -1,4 +1,5 @@
 public protocol AnyDecoded {
-    var codingPath: [BasicCodingKey] { get }
+    var codingPath: [AnyCodingKey] { get }
 }
+
 extension Decoded: AnyDecoded {}

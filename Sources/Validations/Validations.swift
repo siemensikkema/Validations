@@ -5,7 +5,7 @@ public struct Validations<T> {
     let unchecked: Unchecked<T>
     var validationErrors: KeyedErrors = [:]
 
-    mutating func add<U>(_ error: Error, to keyPath: KeyPath<T, Decoded<U>>) {
+    public mutating func add<U>(_ error: Error, to keyPath: KeyPath<T, Decoded<U>>) {
         guard let value: Decoded<U> = unchecked[dynamicMember: keyPath] else {
             return
         }
@@ -16,15 +16,11 @@ public struct Validations<T> {
         add(error, to: unchecked.codingPath)
     }
 
-    private mutating func add(_ error: Error, to codingPath: [BasicCodingKey]) {
-        validationErrors[codingPath, default: []].append(error)
-    }
-
     public func validated() throws -> AnyValidated<T> {
         .init(checked: try unchecked.checked(mergingErrors: validationErrors))
     }
 
-    mutating func nested<U>(at keyPath: KeyPath<T, Decoded<U>>, closure: (inout Validations<U>) -> Void) {
+    public mutating func nested<U>(at keyPath: KeyPath<T, Decoded<U>>, closure: (inout Validations<U>) -> Void) {
         guard let value: Decoded<U> = unchecked[dynamicMember: keyPath] else {
             return
         }
@@ -32,9 +28,11 @@ public struct Validations<T> {
         closure(&validations)
         self.validationErrors.merge(validations.validationErrors, uniquingKeysWith: +)
     }
+}
 
-    mutating func withUncheckedValue(_ closure: (Unchecked<T>) -> KeyedErrors) {
-        validationErrors.merge(closure(unchecked), uniquingKeysWith: +)
+private extension Validations {
+    mutating func add(_ error: Error, to codingPath: [AnyCodingKey]) {
+        validationErrors[codingPath, default: []].append(error)
     }
 }
 

@@ -5,10 +5,10 @@ public struct Unchecked<T> {
     let decoded: Decoded<T>
 
     var value: T? {
-        try? decoded.state.getValue()
+        try? decoded.state.requireValue()
     }
 
-    public var codingPath: [BasicCodingKey] { decoded.codingPath }
+    public var codingPath: [AnyCodingKey] { decoded.codingPath }
 
     public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U? {
         value?[keyPath: keyPath]
@@ -19,7 +19,7 @@ public struct Unchecked<T> {
     }
 
     public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> U? {
-        try? value?[keyPath: keyPath].state.getValue()
+        try? value?[keyPath: keyPath].state.requireValue()
     }
 }
 
