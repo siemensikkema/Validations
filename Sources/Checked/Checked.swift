@@ -2,23 +2,31 @@ import Decoded
 
 @dynamicMemberLookup
 public struct Checked<T> {
-    let unchecked: Unchecked<T>
+    let decoded: Decoded<T>
+
+    fileprivate init(decoded: Decoded<T>) {
+        self.decoded = decoded
+    }
 
     public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
-        unchecked[dynamicMember: keyPath]!
+        try! decoded[dynamicMember: keyPath]
     }
 
     public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> Checked<U> {
-        .init(unchecked: unchecked[dynamicMember: keyPath]!)
+        try! .init(decoded: decoded[dynamicMember: keyPath])
     }
 
     public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> U {
-        unchecked[dynamicMember: keyPath]!
+        try! decoded[dynamicMember: keyPath]
     }
 }
 
 extension Decoded {
-    public func checked() throws -> Checked<T> {
-        try unchecked().checked()
+    public func checked(mergingErrors additional: KeyedErrors? = nil) throws -> Checked<T> {
+        if let keyedErrors = keyedErrors().merging(additional) {
+            throw keyedErrors
+        }
+
+        return .init(decoded: self)
     }
 }

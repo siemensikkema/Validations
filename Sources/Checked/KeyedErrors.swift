@@ -58,7 +58,7 @@ extension Decoded: KeyedErrorsProtocol {
 
 extension State {
     func keyedErrors() throws -> KeyedErrors? {
-        Mirror(reflecting: try requireValue())
+        Mirror(reflecting: try value)
             .children
             .reduce(into: nil) { keyedErrors, child in
                 keyedErrors.merge(child.value as? KeyedErrorsProtocol)

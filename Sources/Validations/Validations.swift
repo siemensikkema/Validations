@@ -2,42 +2,38 @@ import Checked
 import Decoded
 
 public struct Validations<T> {
-    let unchecked: Unchecked<T>
+    let decoded: Decoded<T>
     var keyedErrors: KeyedErrors? = nil
 
     public mutating func add<U>(_ error: Error, to keyPath: KeyPath<T, Decoded<U>>) {
-        guard let value: Decoded<U> = unchecked[dynamicMember: keyPath] else {
-            return
+        do {
+            add(error, to: try decoded[dynamicMember: keyPath].codingPath)
+        } catch {
+            // ignore
         }
-        add(error, to: value.codingPath)
     }
 
     public mutating func add(_ error: Error) {
-        add(error, to: unchecked.codingPath)
+        add(error, to: decoded.codingPath)
     }
 
     public func validated() throws -> AnyValidated<T> {
-        .init(checked: try unchecked.checked(mergingErrors: keyedErrors))
+        .init(checked: try decoded.checked(mergingErrors: keyedErrors))
     }
 
     public mutating func nested<U>(at keyPath: KeyPath<T, Decoded<U>>, closure: (inout Validations<U>) -> Void) {
-        guard let value: Decoded<U> = unchecked[dynamicMember: keyPath] else {
-            return
+        do {
+            var validations = Validations<U>(decoded: try decoded[dynamicMember: keyPath])
+            closure(&validations)
+            keyedErrors.merge(validations.keyedErrors)
+        } catch {
+            // ignore
         }
-        var validations = value.validations()
-        closure(&validations)
-        keyedErrors.merge(validations.keyedErrors)
     }
 }
 
 private extension Validations {
     mutating func add(_ error: Error, to codingPath: CodingPath) {
         keyedErrors?.merge(.init(error: error, codingPath: codingPath))
-    }
-}
-
-public extension Decoded {
-    func validations() -> Validations<T> {
-        .init(unchecked: unchecked())
     }
 }

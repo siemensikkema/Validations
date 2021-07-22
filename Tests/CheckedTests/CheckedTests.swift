@@ -38,5 +38,14 @@ final class CheckedTests: XCTestCase {
             XCTAssertEqual(mappedErrors, [[]: [true]])
         }
     }
-}
 
+    func test_nameConflictWithState() throws {
+        struct City: Decodable {
+            let state: Decoded<String>
+        }
+        let decoded = try decode(#"{"state":"NY"}"#, as: City.self)
+        let checked = try decoded.checked()
+        XCTAssertEqual(checked.state, "NY")
+        XCTAssertEqual(checked.state.codingPath, ["state"])
+    }
+}

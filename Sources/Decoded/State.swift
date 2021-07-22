@@ -8,26 +8,29 @@ public enum State<T> {
 extension State: Equatable where T: Equatable {}
 
 public extension State {
-    func requireValue() throws -> T {
-        func valueAsNil() -> T? {
-            (T.self as? ExpressibleByNilLiteral.Type)?.init(nilLiteral: ()) as? T
-        }
+//    func requireValue() throws -> T {
+    var value: T {
+        get throws {
+            func valueAsNil() -> T? {
+                (T.self as? ExpressibleByNilLiteral.Type)?.init(nilLiteral: ()) as? T
+            }
 
-        switch self {
-        case .value(let value):
-            return value
-        case .absent:
-            guard let value = valueAsNil() else {
-                throw Absent()
+            switch self {
+            case .value(let value):
+                return value
+            case .absent:
+                guard let value = valueAsNil() else {
+                    throw Absent()
+                }
+                return value
+            case .nil:
+                guard let value = valueAsNil() else {
+                    throw Nil()
+                }
+                return value
+            case .typeMismatch(let description):
+                throw TypeMismatch(description: description)
             }
-            return value
-        case .nil:
-            guard let value = valueAsNil() else {
-                throw Nil()
-            }
-            return value
-        case .typeMismatch(let description):
-            throw TypeMismatch(description: description)
         }
     }
 }

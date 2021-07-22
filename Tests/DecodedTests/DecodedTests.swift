@@ -27,8 +27,8 @@ final class DecodedTests: XCTestCase {
         let decoded = try decode("{}", as: Gadget.self)
         XCTAssertEqual(decoded.codingPath, [])
 
-        let decodedName = try decoded.state.requireValue().name
-        XCTAssertEqual(decodedName.codingPath, [.init(stringValue: "name")])
+        let decodedName = try decoded.state.value.name
+        XCTAssertEqual(decodedName.codingPath, ["name"])
         XCTAssertEqual(decodedName.state, .absent)
     }
 }

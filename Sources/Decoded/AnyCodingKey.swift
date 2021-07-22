@@ -19,3 +19,15 @@ public struct AnyCodingKey: CodingKey, Hashable {
         self.intValue = intValue
     }
 }
+
+extension AnyCodingKey: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(stringValue: value)
+    }
+}
+
+extension AnyCodingKey: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self.init(intValue: value)
+    }
+}
