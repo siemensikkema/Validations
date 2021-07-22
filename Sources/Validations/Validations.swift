@@ -3,7 +3,7 @@ import Decoded
 
 public struct Validations<T> {
     let unchecked: Unchecked<T>
-    var validationErrors: KeyedErrors = [:]
+    var keyedErrors: KeyedErrors? = nil
 
     public mutating func add<U>(_ error: Error, to keyPath: KeyPath<T, Decoded<U>>) {
         guard let value: Decoded<U> = unchecked[dynamicMember: keyPath] else {
@@ -17,7 +17,7 @@ public struct Validations<T> {
     }
 
     public func validated() throws -> AnyValidated<T> {
-        .init(checked: try unchecked.checked(mergingErrors: validationErrors))
+        .init(checked: try unchecked.checked(mergingErrors: keyedErrors))
     }
 
     public mutating func nested<U>(at keyPath: KeyPath<T, Decoded<U>>, closure: (inout Validations<U>) -> Void) {
@@ -26,13 +26,13 @@ public struct Validations<T> {
         }
         var validations = value.validations()
         closure(&validations)
-        self.validationErrors.merge(validations.validationErrors, uniquingKeysWith: +)
+        keyedErrors.merge(validations.keyedErrors)
     }
 }
 
 private extension Validations {
-    mutating func add(_ error: Error, to codingPath: [AnyCodingKey]) {
-        validationErrors[codingPath, default: []].append(error)
+    mutating func add(_ error: Error, to codingPath: CodingPath) {
+        keyedErrors?.merge(.init(error: error, codingPath: codingPath))
     }
 }
 

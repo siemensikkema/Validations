@@ -2,13 +2,13 @@ import Decoded
 import XCTest
 
 final class DecodedTests: XCTestCase {
-    func test_singleValue() throws {
+    func test_value() throws {
         let decoded = try decode("1", as: Int.self)
         XCTAssertEqual(decoded.codingPath, [])
         XCTAssertEqual(decoded.state, .value(1))
     }
 
-    func test_nilValue() throws {
+    func test_nil() throws {
         let decoded = try decode("null", as: Int.self)
         XCTAssertEqual(decoded.codingPath, [])
         XCTAssertEqual(decoded.state, .nil)

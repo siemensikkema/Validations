@@ -30,10 +30,12 @@ final class CheckedTests: XCTestCase {
         let decoded = try decode("0", as: String.self)
 
         XCTAssertThrowsError(try decoded.checked()) { error in
-            guard error is DecodingErrors else {
-                XCTFail("expected error of type `DecodingErrors`")
+            guard let error = error as? KeyedErrors else {
+                XCTFail("expected error of type `KeyedErrors`")
                 return
             }
+            let mappedErrors = error.mapErrors { $0 is State<String>.TypeMismatch }
+            XCTAssertEqual(mappedErrors, [[]: [true]])
         }
     }
 }

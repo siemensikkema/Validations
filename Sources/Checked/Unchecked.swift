@@ -8,7 +8,7 @@ public struct Unchecked<T> {
         try? decoded.state.requireValue()
     }
 
-    public var codingPath: [AnyCodingKey] { decoded.codingPath }
+    public var codingPath: CodingPath { decoded.codingPath }
 
     public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U? {
         value?[keyPath: keyPath]
@@ -30,10 +30,11 @@ extension Decoded {
 }
 
 extension Unchecked {
-    public func checked(mergingErrors additional: KeyedErrors = [:]) throws -> Checked<T> {
-        if let error = DecodingErrors(keyedErrors: decoded.keyedErrors().merging(additional, uniquingKeysWith: +)) {
-            throw error
+    public func checked(mergingErrors additional: KeyedErrors? = nil) throws -> Checked<T> {
+        if let keyedErrors = decoded.keyedErrors().merging(additional) {
+            throw keyedErrors
         }
+
         return .init(unchecked: self)
     }
 }

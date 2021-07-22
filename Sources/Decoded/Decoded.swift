@@ -1,5 +1,5 @@
 public struct Decoded<T> {
-    public let codingPath: [AnyCodingKey]
+    public let codingPath: CodingPath
     public let state: State<T>
 }
 
