@@ -5,7 +5,7 @@ import XCTest
 final class CheckedTests: XCTestCase {
     func test_directPropertyAccess() throws {
         struct Gadget: Decodable {
-            let name: Decoded<String>
+            @Decoded<String> var name
         }
 
         let decoded = try decode(#"{"name":"arduino"}"#, as: Gadget.self)
@@ -16,9 +16,9 @@ final class CheckedTests: XCTestCase {
     func test_directPropertyAccess_nested() throws {
         struct CarRequest: Decodable {
             struct Engine: Decodable {
-                let cylinderVolume: Decoded<Double>
+                @Decoded<Double> var cylinderVolume
             }
-            let engine: Decoded<Engine>
+            @Decoded<Engine> var engine
         }
 
         let decoded = try decode(#"{"engine":{"cylinderVolume": 0.9}}"#, as: CarRequest.self)
@@ -34,18 +34,21 @@ final class CheckedTests: XCTestCase {
                 XCTFail("expected error of type `KeyedErrors`")
                 return
             }
-            let mappedErrors = error.mapErrors { $0 is State<String>.TypeMismatch }
+            let mappedErrors = error.mapErrors { $0 is Decoded<String>.State.TypeMismatch }
             XCTAssertEqual(mappedErrors, [[]: [true]])
         }
     }
 
     func test_nameConflictWithState() throws {
         struct City: Decodable {
-            let state: Decoded<String>
+            struct State: Decodable {
+                @Decoded<String> var name
+            }
+            @Decoded<State> var state
         }
-        let decoded = try decode(#"{"state":"NY"}"#, as: City.self)
+        let decoded = try decode(#"{"state":{"name":"NY"}}"#, as: City.self)
         let checked = try decoded.checked()
-        XCTAssertEqual(checked.state, "NY")
-        XCTAssertEqual(checked.state.codingPath, ["state"])
+        XCTAssertEqual(checked.state.name, "NY")
+        XCTAssertEqual(checked.$state.codingPath, ["state"])
     }
 }

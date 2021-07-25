@@ -2,22 +2,22 @@ import Decoded
 
 @dynamicMemberLookup
 public struct Checked<T> {
-    let decoded: Decoded<T>
+    let state: Decoded<T>.State
 
-    fileprivate init(decoded: Decoded<T>) {
-        self.decoded = decoded
+    fileprivate init(state: Decoded<T>.State) {
+        self.state = state
     }
 
     public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
-        try! decoded[dynamicMember: keyPath]
+        try! state[dynamicMember: keyPath]
     }
 
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> Checked<U> {
-        try! .init(decoded: decoded[dynamicMember: keyPath])
+    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> Checked<U> {
+        try! .init(state: state[dynamicMember: keyPath])
     }
 
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> U {
-        try! decoded[dynamicMember: keyPath]
+    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> U {
+        try! state[dynamicMember: keyPath]
     }
 }
 
@@ -27,6 +27,6 @@ extension Decoded {
             throw keyedErrors
         }
 
-        return .init(decoded: self)
+        return .init(state: wrappedValue)
     }
 }

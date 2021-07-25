@@ -1,11 +1,11 @@
 extension Decoded: Decodable where T: Decodable {
     public init(from decoder: Decoder) throws {
         codingPath = decoder.codingPath.map(AnyCodingKey.init)
-        state = try .init(from: decoder)
+        wrappedValue = try .init(from: decoder)
     }
 }
 
-extension State: Decodable where T: Decodable {
+extension Decoded.State: Decodable where T: Decodable {
     public init(from decoder: Decoder) throws {
         do {
             let container = try decoder.singleValueContainer()
@@ -23,7 +23,7 @@ public extension KeyedDecodingContainer {
     ) throws -> Decoded<T> {
         .init(
             codingPath: (codingPath + [key]).map(AnyCodingKey.init),
-            state: try decodeIfPresent(State<T>.self, forKey: key) ?? (contains(key) ? .nil : .absent)
+            wrappedValue: try decodeIfPresent(Decoded<T>.State.self, forKey: key) ?? (contains(key) ? .nil : .absent)
         )
     }
 }

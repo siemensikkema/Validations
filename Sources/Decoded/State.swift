@@ -1,14 +1,33 @@
-public enum State<T> {
-    case absent
-    case `nil`
-    case value(T)
-    case typeMismatch(String)
+public extension Decoded {
+    enum State {
+        case absent
+        case `nil`
+        case value(T)
+        case typeMismatch(String)
+    }
 }
 
-extension State: Equatable where T: Equatable {}
+extension Decoded.State: Equatable where T: Equatable {}
 
-public extension State {
-//    func requireValue() throws -> T {
+public extension Decoded.State {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
+        get throws {
+            try value[keyPath: keyPath]
+        }
+    }
+
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> Decoded<U>.State {
+        get throws {
+            try value[keyPath: keyPath]
+        }
+    }
+
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> U {
+        get throws {
+            try value[keyPath: keyPath].value
+        }
+    }
+
     var value: T {
         get throws {
             func valueAsNil() -> T? {

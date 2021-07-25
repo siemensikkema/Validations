@@ -1,24 +1,15 @@
+@propertyWrapper
 public struct Decoded<T> {
+    public init(codingPath: CodingPath = [], wrappedValue: State = .absent) {
+        self.codingPath = codingPath
+        self.wrappedValue = wrappedValue
+    }
+
     public let codingPath: CodingPath
-    public let state: State<T>
+    public let wrappedValue: State
 
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
-        get throws {
-            try state.value[keyPath: keyPath]
-        }
-    }
-
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> Decoded<U> {
-        get throws {
-            try state.value[keyPath: keyPath]
-        }
-    }
-
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> U {
-        get throws {
-            try state.value[keyPath: keyPath].state.value
-        }
-    }
+    public var projectedValue: Self { self }
+    public var state: State { wrappedValue }
 }
 
 extension Decoded: Equatable where T: Equatable {}

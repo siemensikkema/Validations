@@ -49,14 +49,14 @@ protocol KeyedErrorsProtocol {
 extension Decoded: KeyedErrorsProtocol {
     func keyedErrors() -> KeyedErrors? {
         do {
-            return try state.keyedErrors()
+            return try wrappedValue.keyedErrors()
         } catch {
             return .init(error: error, codingPath: codingPath)
         }
     }
 }
 
-extension State {
+extension Decoded.State {
     func keyedErrors() throws -> KeyedErrors? {
         Mirror(reflecting: try value)
             .children
