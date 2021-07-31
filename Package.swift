@@ -24,17 +24,22 @@ let package = Package(
             name: "Validations",
             dependencies: ["Checked"]
         ),
+        .target(
+            name: "Common",
+            dependencies: [],
+            path: "Tests/Common"
+        ),
         .testTarget(
             name: "CheckedTests",
-            dependencies: ["Checked"]
+            dependencies: ["Checked", "Common"]
         ),
         .testTarget(
             name: "DecodedTests",
-            dependencies: ["Decoded"]
+            dependencies: ["Decoded", "Common"]
         ),
         .testTarget(
             name: "ValidationsTests",
-            dependencies: ["Validations"]
+            dependencies: ["Validations", "Common"]
         ),
     ]
 )

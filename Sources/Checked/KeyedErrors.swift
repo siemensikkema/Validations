@@ -49,7 +49,7 @@ protocol KeyedErrorsProtocol {
 extension Decoded: KeyedErrorsProtocol {
     func keyedErrors() -> KeyedErrors? {
         do {
-            return try wrappedValue.keyedErrors()
+            return try state.keyedErrors()
         } catch {
             return .init(error: error, codingPath: codingPath)
         }

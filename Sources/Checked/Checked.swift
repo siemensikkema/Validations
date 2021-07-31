@@ -7,17 +7,39 @@ public struct Checked<T> {
     fileprivate init(state: Decoded<T>.State) {
         self.state = state
     }
+}
 
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
+public extension Checked {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
         try! state[dynamicMember: keyPath]
     }
 
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> Checked<U> {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> Checked<U> {
         try! .init(state: state[dynamicMember: keyPath])
     }
 
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> U {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State>) -> U {
         try! state[dynamicMember: keyPath]
+    }
+
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State?>) -> Checked<U>? {
+        try! state[dynamicMember: keyPath].map(Checked<U>.init)
+    }
+
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>.State?>) -> U? {
+        try! state[dynamicMember: keyPath]
+    }
+}
+
+public extension Checked where T: Sequence {
+    func unwrapped<U>() -> [U] where T.Element == Decoded<U>.State {
+        try! state.value.unwrapped()
+    }
+}
+
+public extension Checked {
+    func unwrapped<Key, Value>() -> [Key: Value] where T == [Key: Decoded<Value>.State] {
+        try! state.value.unwrapped()
     }
 }
 
@@ -27,6 +49,12 @@ extension Decoded {
             throw keyedErrors
         }
 
-        return .init(state: wrappedValue)
+        return .init(state: state)
+    }
+}
+
+extension Checked: Decodable where T: Decodable {
+    public init(from decoder: Decoder) throws {
+        self = try Decoded<T>(from: decoder).checked()
     }
 }
