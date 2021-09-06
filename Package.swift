@@ -13,25 +13,17 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Checked",
-            dependencies: ["Decoded"]
-        ),
-        .target(
             name: "Decoded",
             dependencies: []
         ),
         .target(
             name: "Validations",
-            dependencies: ["Checked"]
+            dependencies: ["Decoded"]
         ),
         .target(
             name: "Common",
             dependencies: ["Decoded"],
             path: "Tests/Common"
-        ),
-        .testTarget(
-            name: "CheckedTests",
-            dependencies: ["Checked", "Common"]
         ),
         .testTarget(
             name: "DecodedTests",

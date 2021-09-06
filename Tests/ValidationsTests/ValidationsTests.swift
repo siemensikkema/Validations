@@ -122,14 +122,12 @@ func == <T, U: Equatable>(keyPath: KeyPath<T, Decoded<U>>, value: U) -> Validato
     }
 }
 
-import Checked
-
 extension Decoded {
-    func validated(_ validator: Validator<T>) throws -> Checked<T> {
-        try checked(mergingErrors: validator(self))
+    func validated(_ validator: Validator<T>) throws -> Validated<T> {
+        try validated(mergingErrors: validator(self))
     }
 
-    func validated(@ValidatorBuilder<T> makeValidator: () -> Validator<T>) throws -> Checked<T> {
+    func validated(@ValidatorBuilder<T> makeValidator: () -> Validator<T>) throws -> Validated<T> {
         try validated(makeValidator())
     }
 

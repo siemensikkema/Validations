@@ -25,16 +25,12 @@ By striving to fulfill the goals below, this framework aims to make writing good
 
 ## Structure
 
-It consists of 3 targets: Decoded, Checked, and Validations. These incrementally provide the full functionality of this framework. But each can of course be used on its own. 
+It consists of 2 targets: Decoded and Validations. Together, these provide the full functionality of this framework. But each can be used on its own. 
 
 ### `Decoded`: Capture success _and_ error states from decoding
 
 `Decoded` provides a layer on top of Swift's `Codable` that allows for capturing and collecting error states.
 
-### `Checked`: Assert successful decoding and obtain a convenient view into the data
-
-`Checked` provides convenient access to (a hierarchy of) `Decoded` values and enables guaranteeing successful decoding.
-
-### `Validations` Describe the conditions under which data is valid with
+### `Validations`: Validate the decoded values and get a view into the data 
 
 `Validations` aims to add a powerful domain specific language (DSL) to express what input we should consider valid.

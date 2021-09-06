@@ -1,13 +1,13 @@
 import Common
-import Checked
 import Decoded
+import Validations
 import XCTest
 
-final class CheckedTests: XCTestCase {
+final class ValidatedTests: XCTestCase {
     func test_singleValue() throws {
         let decoded: Decoded<DecodedValueWrapper<Int>> = try decode("0")
-        let checked = try decoded.checked()
-        XCTAssertEqual(checked.value, 0)
+        let validated = try decoded.validated()
+        XCTAssertEqual(validated.value, 0)
     }
 
     func test_directPropertyAccess() throws {
@@ -16,8 +16,8 @@ final class CheckedTests: XCTestCase {
         }
 
         let decoded: Decoded<Gadget> = try decode(#"{"name":"arduino"}"#)
-        let checked = try decoded.checked()
-        XCTAssertEqual(checked.name, "arduino")
+        let validated = try decoded.validated()
+        XCTAssertEqual(validated.name, "arduino")
     }
 
     func test_directPropertyAccess_nested() throws {
@@ -29,14 +29,14 @@ final class CheckedTests: XCTestCase {
         }
 
         let decoded: Decoded<CarRequest> = try decode(#"{"engine":{"cylinderVolume": 0.9}}"#)
-        let checked = try decoded.checked()
-        XCTAssertEqual(checked.engine.cylinderVolume, 0.9)
+        let validated = try decoded.validated()
+        XCTAssertEqual(validated.engine.cylinderVolume, 0.9)
     }
 
     func test_checkingFailedDecodingThrowsError() throws {
         let decoded: Decoded<String> = try decode("0")
 
-        XCTAssertThrowsError(try decoded.checked()) { error in
+        XCTAssertThrowsError(try decoded.validated()) { error in
             guard let error = error as? KeyedErrors else {
                 XCTFail("expected error of type `KeyedErrors`")
                 return
@@ -54,31 +54,31 @@ final class CheckedTests: XCTestCase {
             @Decoded<State> var state
         }
         let decoded: Decoded<City> = try decode(#"{"state":{"name":"NY"}}"#)
-        let checked = try decoded.checked()
-        XCTAssertEqual(checked.state.name, "NY")
-        XCTAssertEqual(checked.$state.codingPath, ["state"])
+        let validated = try decoded.validated()
+        XCTAssertEqual(validated.state.name, "NY")
+        XCTAssertEqual(validated.$state.codingPath, ["state"])
     }
 
     func test_directDecoding() throws {
-        let decoded: Checked<DecodedValueWrapper<Int>> = try decode("1")
+        let decoded: Validated<DecodedValueWrapper<Int>> = try decode("1")
         XCTAssertEqual(decoded.value, 1)
     }
 
     func test_array() throws {
-        let checked: Checked<[DecodingResult<Int>]> = try decode("[1,2,3]")
-        XCTAssertEqual(checked.count, 3)
-        XCTAssertEqual(checked[0], 1)
-        XCTAssertEqual(checked.first, 1)
-        XCTAssertEqual(try checked.first?.value, 1)
+        let validated: Validated<[DecodingResult<Int>]> = try decode("[1,2,3]")
+        XCTAssertEqual(validated.count, 3)
+        XCTAssertEqual(validated[0], 1)
+        XCTAssertEqual(validated.first, 1)
+        XCTAssertEqual(try validated.first?.value, 1)
 
-        XCTAssertEqual(checked.unwrapped(), [1,2,3])
+        XCTAssertEqual(validated.unwrapped(), [1,2,3])
     }
 
     func test_dictionary() throws {
-        let checked: Checked<[String: DecodingResult<Int>]> = try decode(#"{"a":1}"#)
-        XCTAssertEqual(checked.count, 1)
-        XCTAssertEqual(checked["a"], 1)
+        let validated: Validated<[String: DecodingResult<Int>]> = try decode(#"{"a":1}"#)
+        XCTAssertEqual(validated.count, 1)
+        XCTAssertEqual(validated["a"], 1)
 
-        XCTAssertEqual(checked.unwrapped(), ["a": 1])
+        XCTAssertEqual(validated.unwrapped(), ["a": 1])
     }
 }

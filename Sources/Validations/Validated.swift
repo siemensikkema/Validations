@@ -1,7 +1,7 @@
 import Decoded
 
 @dynamicMemberLookup
-public struct Checked<T> {
+public struct Validated<T> {
     let decodingSuccess: DecodingSuccess<T>
 
     fileprivate init(_ result: DecodingResult<T>) throws {
@@ -14,7 +14,7 @@ public struct Checked<T> {
     }
 }
 
-public extension Checked {
+public extension Validated {
     private var value: T {
         decodingSuccess.value
     }
@@ -23,7 +23,7 @@ public extension Checked {
         value[keyPath: keyPath]
     }
 
-    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>>) -> Checked<U> {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>>) -> Validated<U> {
         try! .init(value[keyPath: keyPath])
     }
 
@@ -31,8 +31,8 @@ public extension Checked {
         try! value[keyPath: keyPath].value
     }
 
-    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>?>) -> Checked<U>? {
-        try! value[keyPath: keyPath].map(Checked<U>.init)
+    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>?>) -> Validated<U>? {
+        try! value[keyPath: keyPath].map(Validated<U>.init)
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>?>) -> U? {
@@ -40,20 +40,20 @@ public extension Checked {
     }
 }
 
-public extension Checked where T: Sequence {
+public extension Validated where T: Sequence {
     func unwrapped<U>() -> [U] where T.Element == DecodingResult<U> {
         try! value.unwrapped()
     }
 }
 
-public extension Checked {
+public extension Validated {
     func unwrapped<Key, Value>() -> [Key: Value] where T == [Key: DecodingResult<Value>] {
         try! value.unwrapped()
     }
 }
 
 extension Decoded {
-    public func checked(mergingErrors additional: KeyedErrors? = nil) throws -> Checked<T> {
+    public func validated(mergingErrors additional: KeyedErrors? = nil) throws -> Validated<T> {
         if let keyedErrors = keyedErrors().merging(additional) {
             throw keyedErrors
         }
@@ -62,8 +62,8 @@ extension Decoded {
     }
 }
 
-extension Checked: Decodable where T: Decodable {
+extension Validated: Decodable where T: Decodable {
     public init(from decoder: Decoder) throws {
-        self = try Decoded<T>(from: decoder).checked()
+        self = try Decoded<T>(from: decoder).validated()
     }
 }
