@@ -48,8 +48,34 @@ struct ValidatorBuilder<T> {
         }
     }
 
-    static func buildExpression(_ expression: Validator<T>) -> Validator<T> {
-        expression
+    static func buildOptional(_ validator: Validator<T>?) -> Validator<T> {
+        .init { decoded in
+            validator?(decoded)
+        }
+    }
+
+    static func buildEither(first validator: Validator<T>) -> Validator<T> {
+        validator
+    }
+
+    static func buildEither(second validator: Validator<T>) -> Validator<T> {
+        validator
+    }
+
+    static func buildExpression(_ validator: Validator<T>) -> Validator<T> {
+        validator
+    }
+
+    static func buildLimitedAvailability(_ validator: Validator<T>) -> Validator<T> {
+        validator
+    }
+
+    static func buildArray(_ validators: [Validator<T>]) -> Validator<T> {
+        .init { decoded in
+            validators.reduce(nil) { partialResult, validator in
+                partialResult.merging(validator(decoded))
+            }
+        }
     }
 
     static func buildExpression(_ keyPath: KeyPath<T, Bool>) -> Validator<T> {
@@ -65,6 +91,12 @@ struct ValidatorBuilder<T> {
                 return KeyedErrors(codingPath: decoded.codingPath, error: BasicValidationError(reason: "not true"))
             }
             return nil
+        }
+    }
+
+    static func buildExpression(_ error: Error) -> Validator<T> {
+        .init { decoded in
+            KeyedErrors(codingPath: decoded.codingPath, error: error)
         }
     }
 }
