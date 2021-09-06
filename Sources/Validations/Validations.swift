@@ -7,7 +7,7 @@ public struct Validations<T> {
 
     public mutating func add<U>(_ error: Error, to keyPath: KeyPath<T, Decoded<U>>) {
         do {
-            add(error, to: try decoded.state[dynamicMember: keyPath].codingPath)
+            add(error, to: try decoded.result.value[keyPath: keyPath].codingPath)
         } catch {
             // ignore
         }
@@ -23,7 +23,7 @@ public struct Validations<T> {
 
     public mutating func nested<U>(at keyPath: KeyPath<T, Decoded<U>>, closure: (inout Validations<U>) -> Void) {
         do {
-            var validations = Validations<U>(decoded: try decoded.state[dynamicMember: keyPath])
+            var validations = Validations<U>(decoded: try decoded.result.value[keyPath: keyPath])
             closure(&validations)
             keyedErrors.merge(validations.keyedErrors)
         } catch {
@@ -34,6 +34,6 @@ public struct Validations<T> {
 
 private extension Validations {
     mutating func add(_ error: Error, to codingPath: CodingPath) {
-        keyedErrors?.merge(.init(error: error, codingPath: codingPath))
+        keyedErrors?.merge(.init(codingPath: codingPath, error: error))
     }
 }

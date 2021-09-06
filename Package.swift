@@ -26,7 +26,7 @@ let package = Package(
         ),
         .target(
             name: "Common",
-            dependencies: [],
+            dependencies: ["Decoded"],
             path: "Tests/Common"
         ),
         .testTarget(

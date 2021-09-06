@@ -41,7 +41,7 @@ final class CheckedTests: XCTestCase {
                 XCTFail("expected error of type `KeyedErrors`")
                 return
             }
-            let mappedErrors = error.mapErrors { $0 is Decoded<String>.State.TypeMismatch }
+            let mappedErrors = error.mapErrors { $0 is DecodingFailure }
             XCTAssertEqual(mappedErrors, [[]: [true]])
         }
     }
@@ -65,7 +65,7 @@ final class CheckedTests: XCTestCase {
     }
 
     func test_array() throws {
-        let checked: Checked<[Decoded<Int>.State]> = try decode("[1,2,3]")
+        let checked: Checked<[DecodingResult<Int>]> = try decode("[1,2,3]")
         XCTAssertEqual(checked.count, 3)
         XCTAssertEqual(checked[0], 1)
         XCTAssertEqual(checked.first, 1)
@@ -75,7 +75,7 @@ final class CheckedTests: XCTestCase {
     }
 
     func test_dictionary() throws {
-        let checked: Checked<[String: Decoded<Int>.State]> = try decode(#"{"a":1}"#)
+        let checked: Checked<[String: DecodingResult<Int>]> = try decode(#"{"a":1}"#)
         XCTAssertEqual(checked.count, 1)
         XCTAssertEqual(checked["a"], 1)
 

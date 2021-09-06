@@ -5,7 +5,7 @@ public struct KeyedErrors: Error {
 
     public var value: [CodingPath: [Error]] { _value }
 
-    public init(error: Error, codingPath: CodingPath) {
+    public init(codingPath: CodingPath, error: Error) {
         self._value = [codingPath: [error]]
     }
 
@@ -49,14 +49,14 @@ protocol KeyedErrorsProtocol {
 extension Decoded: KeyedErrorsProtocol {
     func keyedErrors() -> KeyedErrors? {
         do {
-            return try state.keyedErrors()
+            return try result.keyedErrors()
         } catch {
-            return .init(error: error, codingPath: codingPath)
+            return .init(codingPath: codingPath, error: error)
         }
     }
 }
 
-extension Decoded.State {
+extension DecodingResult {
     func keyedErrors() throws -> KeyedErrors? {
         Mirror(reflecting: try value)
             .children
