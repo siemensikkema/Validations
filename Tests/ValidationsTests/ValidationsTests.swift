@@ -2,147 +2,18 @@ import Validations
 import Decoded
 import XCTest
 
+struct Address: Decodable {
+    @Decoded<String> var street
+    @Decoded<String?> var line2
+    @Decoded<String> var city
+    @Decoded<String> var region
+    @Decoded<String> var postcode
+}
+
 struct User: Decodable {
     @Decoded<String> var email
     @Decoded<String> var name
-}
-
-struct BasicValidationError: Error {
-    let reason: String
-}
-
-struct Validator<T> {
-    let validate: (Decoded<T>) -> KeyedErrors?
-
-    func callAsFunction(_ decoded: Decoded<T>) -> KeyedErrors? {
-        validate(decoded)
-    }
-}
-
-//typealias Validator<T> = (Decoded<T>) -> KeyedErrors?
-
-//protocol ValidationsSuite {
-//    associatedtype T
-//
-//    func validator(_ decoded: Decoded<T>) -> Validator<T>
-//}
-//
-//struct UserValidations: ValidationsSuite {
-//    func validator(_ decoded: Decoded<T>) -> Validator<T> {
-//
-//    }
-//
-//    var validator: Validator<User> {
-//        \.name == "a"
-//        \.email == "b"
-//    }
-//}
-
-@resultBuilder
-struct ValidatorBuilder<T> {
-    static func buildBlock(_ validators: Validator<T>...) -> Validator<T> {
-        .init { decoded in
-            validators.reduce(nil) { partialResult, validator in
-                partialResult.merging(validator(decoded))
-            }
-        }
-    }
-
-    static func buildOptional(_ validator: Validator<T>?) -> Validator<T> {
-        .init { decoded in
-            validator?(decoded)
-        }
-    }
-
-    static func buildEither(first validator: Validator<T>) -> Validator<T> {
-        validator
-    }
-
-    static func buildEither(second validator: Validator<T>) -> Validator<T> {
-        validator
-    }
-
-    static func buildExpression(_ validator: Validator<T>) -> Validator<T> {
-        validator
-    }
-
-    static func buildLimitedAvailability(_ validator: Validator<T>) -> Validator<T> {
-        validator
-    }
-
-    static func buildArray(_ validators: [Validator<T>]) -> Validator<T> {
-        .init { decoded in
-            validators.reduce(nil) { partialResult, validator in
-                partialResult.merging(validator(decoded))
-            }
-        }
-    }
-
-    static func buildExpression(_ keyPath: KeyPath<T, Bool>) -> Validator<T> {
-        .init { decoded in
-            guard
-                let decodedRootValue = try? decoded.result.value
-            else {
-                return nil
-            }
-
-            let decodedValue = decodedRootValue[keyPath: keyPath]
-            guard decodedValue else {
-                return KeyedErrors(codingPath: decoded.codingPath, error: BasicValidationError(reason: "not true"))
-            }
-            return nil
-        }
-    }
-
-    static func buildExpression(_ error: Error) -> Validator<T> {
-        .init { decoded in
-            KeyedErrors(codingPath: decoded.codingPath, error: error)
-        }
-    }
-}
-
-func == <T, U: Equatable>(keyPath: KeyPath<T, Decoded<U>>, value: U) -> Validator<T> {
-    .init { decoded in
-
-        guard
-            let decodedRootValue = try? decoded.result.value
-        else {
-            return nil
-        }
-
-        let decodedValue = decodedRootValue[keyPath: keyPath]
-
-        guard
-            (try? decodedValue.result.value) != value
-        else {
-            return nil
-        }
-
-        return KeyedErrors(codingPath: decodedValue.codingPath, error: BasicValidationError(reason: "not equal"))
-    }
-}
-
-extension Decoded {
-    func validated(_ validator: Validator<T>) throws -> Validated<T> {
-        try validated(mergingErrors: validator(self))
-    }
-
-    func validated(@ValidatorBuilder<T> makeValidator: () -> Validator<T>) throws -> Validated<T> {
-        try validated(makeValidator())
-    }
-
-//    func validated<V>(by validationsSuite: V) throws -> Checked<T>
-//        where V: ValidationsSuite, V.T == T
-//    {
-//        try checked(mergingErrors: validationsSuite.validator(self))
-//    }
-//
-//    func validated() throws -> Checked<T>
-//        where T: ValidationsSuite, T.T == T
-//    {
-//        try validated(by: self.result.value)
-//    }
-
+    @Decoded<Address> var address
 }
 
 final class ValidationsTests: XCTestCase {
@@ -150,41 +21,108 @@ final class ValidationsTests: XCTestCase {
         let decoder = JSONDecoder()
         let data = """
         {
-            "name": "asd",
-            "email": ""
-
+            "name": "a@b.com",
+            "email": "ab.com",
+            "address": {
+                "street": "a",
+                "city": "b",
+                "region": "c",
+                "postcode": "1234"
+            }
         }
         """.data(using: .utf8)!
 
-
         let decoded = try decoder.decode(Decoded<User>.self, from: data)
+        let validator = Validator<User> {
+            \.$name == "asd"
+
+            ValidEmail(\.$email)
+
+            Validator {
+                \.$name != \.$email
+            }.or {
+                \.$name == "ab@b.com"
+            }
+
+            Validator(withValueAt: \.$name) { name in
+                \.$email != name
+            }
+
+            /// Note: specifying the root type (`User`) dramatically speeds up type checking
+            Validator(nestedAt: \User.$address) {
+                \.$street == "a"
+                \.$line2 == nil
+                IsNil(\.$line2)
+                \.$city == "b"
+                \.$region == "c"
+                \.$postcode == "1234"
+            }
+        }
 
         do {
-            let validated = try decoded.validated {
-                \.$name == "asd"
-                nested(\.$email) {
-                    \.isEmpty
-                }
-            }
+            let validated = try decoded.validated(by: validator)
             let name: String = validated.name
-
             print(name)
-        } catch {
-            print(error)
+        } catch let error as KeyedErrors {
+            let presentable = PresentableErrors(error)
+            print(presentable)
+            XCTFail(presentable.description)
         }
     }
 }
 
-func nested<T, U>(_ keyPath: KeyPath<T, Decoded<U>>, @ValidatorBuilder<U> makeValidator: @escaping () -> Validator<U>) -> Validator<T> {
-    .init { decoded in
-        guard
-            let decodedRootValue = try? decoded.result.value
-        else {
-            return nil
+/// A basic example of processing validation errors to make them presentable to an end-user.
+///
+/// More advanced approaches could involve scanning for errors conforming to some protocol to output:
+/// - error codes or translation keys (possibly including dynamic data) for client side translation
+/// - server-side translated errors based on a language code in the request's `Accept` header.
+struct PresentableErrors {
+    let value: [CodingPath: [String]]
+
+    init(_ keyedErrors: KeyedErrors) {
+        self.value = keyedErrors.value.mapValues { errors in
+            errors.map { error in
+                guard let presentableError = error as? PresentableError else {
+                    return "\(error)"
+                }
+                return presentableError.presentableDescription
+            }
         }
-
-        let decodedValue = decodedRootValue[keyPath: keyPath]
-
-        return makeValidator()(decodedValue)
     }
 }
+
+extension PresentableErrors: CustomStringConvertible {
+    var description: String {
+        value.flatMap { codingPath, errors in
+            ["\(codingPath.dotPath):"] + errors.map { " - \($0)" }
+        }.joined(separator: "\n")
+    }
+}
+
+protocol PresentableError {
+    var presentableDescription: String { get }
+}
+
+/**
+ Current Vapor validations to support:
+ - [x] And - obsolete: use multiple validations
+ - [x] Case - obsolete: rely on Decoded
+ - [ ] CharacterSet ? alt:
+ - [ ] Count ? alt: \.count == X
+ - [ ] Email ? alt: don't include due to conflicting definitions
+ - [ ] Empty ? alt: isEmpty
+ - [ ] In
+ - [ ] Nil ? alt:
+ - [x] NilIgnoring - obsolete: use nil or ...
+ - [ ] Not ? alt? use negated operators
+ - [x] Or ?
+ - [ ] Range ?
+ - [ ] URL !
+ - [x] Valid - obsolete: covered by Decoded
+
+ Additional:
+ - [x] Group
+ - [x] Generic closure based validator  ("variadic" - Unwrap / Zip)
+ - [x] Is Nil (for non-comparable)
+ - [x] Is Absent
+*/

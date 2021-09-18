@@ -12,15 +12,15 @@ public struct Decoded<T> {
     public let result: DecodingResult<T>
 }
 
-extension Decoded: Hashable where T: Hashable {}
-extension Decoded: Equatable where T: Equatable {}
-
 extension Decoded: Decodable where T: Decodable {
     public init(from decoder: Decoder) throws {
         codingPath = decoder.codingPath.map(AnyCodingKey.init)
         result = try .init(from: decoder)
     }
 }
+
+extension Decoded: Hashable where T: Hashable {}
+extension Decoded: Equatable where T: Equatable {}
 
 public extension KeyedDecodingContainer {
     func decode<T: Decodable>(
@@ -46,5 +46,17 @@ public extension KeyedDecodingContainer {
         }
 
         return .init(codingPath: codingPath, result: result)
+    }
+}
+
+public extension Decoded {
+    var value: T? {
+        result.value
+    }
+
+    var unwrapped: T {
+        get throws {
+            try result.unwrapped
+        }
     }
 }

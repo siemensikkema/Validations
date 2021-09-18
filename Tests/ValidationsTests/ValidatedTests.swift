@@ -41,8 +41,7 @@ final class ValidatedTests: XCTestCase {
                 XCTFail("expected error of type `KeyedErrors`")
                 return
             }
-            let mappedErrors = error.mapErrors { $0 is DecodingFailure }
-            XCTAssertEqual(mappedErrors, [[]: [true]])
+            XCTAssertTrue(error.value.values.first?.first is DecodingFailure)
         }
     }
 
@@ -69,7 +68,7 @@ final class ValidatedTests: XCTestCase {
         XCTAssertEqual(validated.count, 3)
         XCTAssertEqual(validated[0], 1)
         XCTAssertEqual(validated.first, 1)
-        XCTAssertEqual(try validated.first?.value, 1)
+        XCTAssertEqual(validated.first?.value, 1)
 
         XCTAssertEqual(validated.unwrapped(), [1,2,3])
     }

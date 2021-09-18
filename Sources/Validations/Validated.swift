@@ -28,7 +28,7 @@ public extension Validated {
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>>) -> U {
-        try! value[keyPath: keyPath].value
+        value[keyPath: keyPath].value!
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>?>) -> Validated<U>? {
@@ -36,7 +36,7 @@ public extension Validated {
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>?>) -> U? {
-        try! value[keyPath: keyPath]?.value
+        value[keyPath: keyPath]?.value!
     }
 }
 
@@ -52,9 +52,9 @@ public extension Validated {
     }
 }
 
-extension Decoded {
-    public func validated(mergingErrors additional: KeyedErrors? = nil) throws -> Validated<T> {
-        if let keyedErrors = keyedErrors().merging(additional) {
+public extension Decoded {
+    func validated(mergingErrors additional: KeyedErrorsRepresentable? = nil) throws -> Validated<T> {
+        if let keyedErrors = keyedErrors.merging(additional?.keyedErrors) {
             throw keyedErrors
         }
 

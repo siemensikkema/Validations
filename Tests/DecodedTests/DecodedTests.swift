@@ -7,14 +7,14 @@ final class TopLevelValueDecodingTests: XCTestCase {
         let decoded: Decoded<Int> = try decode("1")
         XCTAssertEqual(decoded.codingPath, [])
         XCTAssertEqual(decoded.result, .success(.value(1)))
-        XCTAssertEqual(try decoded.result.value, 1)
+        XCTAssertEqual(decoded.value, 1)
     }
 
     func test_expected_nil() throws {
         let decoded: Decoded<Int?> = try decode("null")
         XCTAssertEqual(decoded.codingPath, [])
         XCTAssertEqual(decoded.result, .success(.nil))
-        XCTAssertNil(try decoded.result.value)
+        XCTAssertNil(try decoded.unwrapped)
     }
 
     func test_unexpected_nil() throws {
@@ -27,7 +27,7 @@ final class TopLevelValueDecodingTests: XCTestCase {
         }
         XCTAssertEqual(failure.errorType, .valueNotFound)
         XCTAssertEqual(failure.debugDescription, "Expected Int but found null value instead.")
-        XCTAssertThrowsError(try decoded.result.value)
+        XCTAssertThrowsError(try decoded.unwrapped)
     }
 }
 
@@ -40,30 +40,30 @@ final class PropertyDecodingTests: XCTestCase {
         let decoded: Decoded<OptionalName> = try decode(#"{"name": "asd"}"#)
         XCTAssertEqual(decoded.codingPath, [])
 
-        let decodedName = try decoded.result.value.name
+        let decodedName = try decoded.unwrapped.name
         XCTAssertEqual(decodedName.codingPath, ["name"])
         XCTAssertEqual(decodedName.result, .success(.value("asd")))
-        XCTAssertEqual(try decodedName.result.value, "asd")
+        XCTAssertEqual(decodedName.value, "asd")
     }
 
     func test_expected_nil() throws {
         let decoded: Decoded<OptionalName> = try decode(#"{"name": null}"#)
         XCTAssertEqual(decoded.codingPath, [])
 
-        let decodedName = try decoded.result.value.name
+        let decodedName = try decoded.unwrapped.name
         XCTAssertEqual(decodedName.codingPath, ["name"])
         XCTAssertEqual(decodedName.result, .success(.nil))
-        XCTAssertNil(try decodedName.result.value)
+        XCTAssertNil(try decodedName.unwrapped)
     }
 
     func test_expected_absent() throws {
         let decoded: Decoded<OptionalName> = try decode("{}")
         XCTAssertEqual(decoded.codingPath, [])
 
-        let decodedName = try decoded.result.value.name
+        let decodedName = try decoded.unwrapped.name
         XCTAssertEqual(decodedName.codingPath, ["name"])
         XCTAssertEqual(decodedName.result, .success(.absent))
-        XCTAssertNil(try decodedName.result.value)
+        XCTAssertNil(try decodedName.unwrapped)
     }
 
     struct NonOptionalName: Decodable {
@@ -74,7 +74,7 @@ final class PropertyDecodingTests: XCTestCase {
         let decoded: Decoded<NonOptionalName> = try decode(#"{"name": null}"#)
         XCTAssertEqual(decoded.codingPath, [])
 
-        let decodedName = try decoded.result.value.name
+        let decodedName = try decoded.unwrapped.name
         XCTAssertEqual(decodedName.codingPath, ["name"])
 
         guard case .failure(let failure) = decodedName.result else {
@@ -83,14 +83,14 @@ final class PropertyDecodingTests: XCTestCase {
         }
         XCTAssertEqual(failure.errorType, .valueNotFound)
         XCTAssertEqual(failure.debugDescription, "Expected String but found null value instead.")
-        XCTAssertThrowsError(try decodedName.result.value)
+        XCTAssertThrowsError(try decodedName.unwrapped)
     }
 
     func test_unexpected_absent() throws {
         let decoded: Decoded<NonOptionalName> = try decode("{}")
         XCTAssertEqual(decoded.codingPath, [])
 
-        let decodedName = try decoded.result.value.name
+        let decodedName = try decoded.unwrapped.name
         XCTAssertEqual(decodedName.codingPath, ["name"])
 
         guard case .failure(let failure) = decodedName.result else {
@@ -99,6 +99,6 @@ final class PropertyDecodingTests: XCTestCase {
         }
         XCTAssertEqual(failure.errorType, .keyNotFound)
         XCTAssertEqual(failure.debugDescription, #"No value associated with key CodingKeys(stringValue: "name", intValue: nil) ("name")."#)
-        XCTAssertThrowsError(try decodedName.result.value)
+        XCTAssertThrowsError(try decodedName.unwrapped)
     }
 }

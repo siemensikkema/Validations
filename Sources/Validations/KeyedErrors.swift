@@ -1,67 +1,33 @@
 import Decoded
 
 public struct KeyedErrors: Error {
-    var _value: [CodingPath: [Error]]
+    public private(set) var value: [CodingPath: [ValidationError]]
 
-    public var value: [CodingPath: [Error]] { _value }
-
-    public init(codingPath: CodingPath, error: Error) {
-        self._value = [codingPath: [error]]
+    public init(codingPath: CodingPath, error: ValidationError) {
+        self.value = [codingPath: [error]]
     }
 
-    public mutating func merge(_ other: KeyedErrors?) {
-        guard let other = other else { return }
-        _value.merge(other._value, uniquingKeysWith: +)
-    }
-
-    public func mapErrors<T>(_ closure: (Error) -> T) -> [CodingPath: [T]] {
-        _value.mapValues { errors in
-            errors.map(closure)
-        }
+    public mutating func merge(_ other: KeyedErrorsRepresentable?) {
+        guard let other = other?.keyedErrors else { return }
+        value.merge(other.value, uniquingKeysWith: +)
     }
 }
 
-extension Optional where Wrapped == KeyedErrors {
-    public func merging(_ other: KeyedErrors?) -> Self {
-        var copy = self
-        copy.merge(other)
-        return copy
-    }
-
-    public mutating func merge(_ other: KeyedErrors?) {
-        guard var keyedErrors = self else {
-            self = other
-            return
-        }
-        keyedErrors.merge(other)
-        self = keyedErrors
-    }
-
-    mutating func merge(_ other: KeyedErrorsProtocol?) {
-        merge(other?.keyedErrors())
+public extension Optional where Wrapped == KeyedErrors {
+    mutating func merge(_ other: KeyedErrorsRepresentable?) {
+        self = self.merging(other)
     }
 }
 
-protocol KeyedErrorsProtocol {
-    func keyedErrors() -> KeyedErrors?
-}
-
-extension Decoded: KeyedErrorsProtocol {
-    func keyedErrors() -> KeyedErrors? {
-        do {
-            return try result.keyedErrors()
-        } catch {
-            return .init(codingPath: codingPath, error: error)
-        }
+extension KeyedErrors {
+    init(_ keyedError: KeyedError) {
+        self.init(codingPath: keyedError.codingPath, error: keyedError.error)
     }
 }
 
-extension DecodingResult {
-    func keyedErrors() throws -> KeyedErrors? {
-        Mirror(reflecting: try value)
-            .children
-            .reduce(into: nil) { keyedErrors, child in
-                keyedErrors.merge(child.value as? KeyedErrorsProtocol)
-            }
+extension KeyedErrors: KeyedErrorsRepresentable {
+    public var keyedErrors: KeyedErrors? {
+        .init(self)
     }
 }
+
