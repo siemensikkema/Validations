@@ -15,6 +15,10 @@ public extension Decoded {
         value.map(f)
     }
 
+    func map<U>(_ f: (KeyedValue<T>) -> U) -> U? {
+        keyedValue.map(f)
+    }
+
     func map<U>(_ keyPath: KeyPath<T, U>) -> U? {
         map { $0[keyPath: keyPath] }
     }
@@ -28,6 +32,10 @@ public extension Decoded {
     }
 
     func zip<U1, U2>(_ f1: (T) -> U1, _ f2: (T) -> U2) -> (U1, U2)? {
+        map(f1).flatMap { u1 in map(f2).map { u2 in (u1, u2) } }
+    }
+
+    func zip<U1, U2>(_ f1: (KeyedValue<T>) -> U1, _ f2: (KeyedValue<T>) -> U2) -> (U1, U2)? {
         map(f1).flatMap { u1 in map(f2).map { u2 in (u1, u2) } }
     }
 

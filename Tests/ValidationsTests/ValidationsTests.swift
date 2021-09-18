@@ -34,29 +34,28 @@ final class ValidationsTests: XCTestCase {
 
         let decoded = try decoder.decode(Decoded<User>.self, from: data)
         let validator = Validator<User> {
-//            \.$name == "asd"
+            \.$name == "asd"
 
             ValidEmail(\.$email)
 
-//            Validator {
-//                \.$name != \.$email
-//            }.or {
-//                \.$name == "ab@b.com"
-//            }
+            Validator {
+                \.$name != \.$email
+            }.or {
+                \.$name == "ab@b.com"
+            }
 
-//            Validator(withValueAt: \.$name) { name in
-//                \.$email != name
-//            }
+            Validator(withValueAt: \.$name) { name in
+                \.$email != name
+            }
 
-            /// Note: specifying the root type (`User`) dramatically speeds up type checking
-//            Validator(nestedAt: \User.$address) {
-//                \.$street == "a"
-//                \.$line2 == nil
-//                IsNil(\.$line2)
-//                \.$city == "b"
-//                \.$region == "c"
-//                \.$postcode == "1234"
-//            }
+            Validator(nestedAt: \.$address) {
+                \.$street == "a"
+                \.$line2 == nil
+                IsNil(\.$line2)
+                \.$city == "b"
+                \.$region == "c"
+                \.$postcode == "1234"
+            }
         }
 
         do {
