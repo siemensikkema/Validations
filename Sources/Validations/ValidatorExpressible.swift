@@ -5,7 +5,7 @@ public protocol ValidatorExpressible {
     var validator: Validator<T> { get }
 }
 
-public extension ValidatorExpressible {
+extension ValidatorExpressible {
     func callAsFunction(_ decoded: Decoded<T>) -> KeyedErrorsRepresentable? {
         validator.validate(decoded)
     }

@@ -1,7 +1,7 @@
 import Decoded
 
 public struct IsAbsent<T>: ValidatorExpressible {
-    struct Error: ValidationError {}
+    struct Error: Swift.Error {}
 
     public let validator: Validator<T>
 

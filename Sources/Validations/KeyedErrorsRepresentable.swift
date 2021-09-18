@@ -1,10 +1,10 @@
 import Decoded
 
-public protocol KeyedErrorsRepresentable {
+protocol KeyedErrorsRepresentable {
     var keyedErrors: KeyedErrors? { get }
 }
 
-public extension KeyedErrorsRepresentable {
+extension KeyedErrorsRepresentable {
     func merging(_ other: KeyedErrorsRepresentable?) -> KeyedErrors? {
         var copy = keyedErrors
         copy?.merge(other)
@@ -13,19 +13,17 @@ public extension KeyedErrorsRepresentable {
 }
 
 extension Optional: KeyedErrorsRepresentable where Wrapped: KeyedErrorsRepresentable {
-    public var keyedErrors: KeyedErrors? {
+    var keyedErrors: KeyedErrors? {
         self?.keyedErrors
     }
 }
 
 extension Decoded: KeyedErrorsRepresentable {
-    public var keyedErrors: KeyedErrors? {
+    var keyedErrors: KeyedErrors? {
         do {
             return try Mirror(reflecting: result.unwrapped).keyedErrors
-        } catch let error as ValidationError {
-            return .init(codingPath: codingPath, error: error)
         } catch {
-            return nil
+            return .init(codingPath: codingPath, error: error)
         }
     }
 }
@@ -38,9 +36,8 @@ extension Mirror {
     }
 }
 
-
 extension Optional where Wrapped == KeyedErrorsRepresentable {
-    public var keyedErrors: KeyedErrors? {
+    var keyedErrors: KeyedErrors? {
         flatMap(\.keyedErrors)
     }
 }

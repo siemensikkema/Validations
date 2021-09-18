@@ -1,17 +1,17 @@
 import Decoded
 
 public struct KeyedError {
-    public init(codingPath: CodingPath, error: ValidationError) {
+    public init(codingPath: CodingPath, error: Error) {
         self.codingPath = codingPath
         self.error = error
     }
 
     let codingPath: CodingPath
-    let error: ValidationError
+    let error: Error
 }
 
 extension KeyedError: KeyedErrorsRepresentable {
-    public var keyedErrors: KeyedErrors? {
+    var keyedErrors: KeyedErrors? {
         .init(self)
     }
 }

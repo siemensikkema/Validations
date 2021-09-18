@@ -52,14 +52,22 @@ public extension Validated {
     }
 }
 
-public extension Decoded {
-    func validated(mergingErrors additional: KeyedErrorsRepresentable? = nil) throws -> Validated<T> {
-        if let keyedErrors = keyedErrors.merging(additional?.keyedErrors) {
-            throw keyedErrors
+extension Decoded {
+    public func validated() throws -> Validated<T> {
+        try validated(mergingErrors: nil)
+    }
+
+    func validated(mergingErrors additional: KeyedErrorsRepresentable?) throws -> Validated<T> {
+        if let keyedErrors = keyedErrors.merging(additional) {
+            throw ValidationErrors(value: keyedErrors.value)
         }
 
         return try .init(result)
     }
+}
+
+public struct ValidationErrors: Error {
+    public let value: [CodingPath: [Error]]
 }
 
 extension Validated: Decodable where T: Decodable {

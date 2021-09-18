@@ -36,9 +36,7 @@ public struct ValidatorBuilder<T> {
         validator.validator
     }
 
-    public static func buildExpression<K>(_ expression: K) -> Validator<T>
-        where K: KeyedErrorsRepresentable
-    {
+    public static func buildExpression(_ expression: KeyedError) -> Validator<T> {
         .init { _ in expression.keyedErrors }
     }
 

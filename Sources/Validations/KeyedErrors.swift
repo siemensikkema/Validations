@@ -1,9 +1,9 @@
 import Decoded
 
-public struct KeyedErrors: Error {
-    public private(set) var value: [CodingPath: [ValidationError]]
+struct KeyedErrors {
+    private(set) var value: [CodingPath: [Error]]
 
-    public init(codingPath: CodingPath, error: ValidationError) {
+    public init(codingPath: CodingPath, error: Error) {
         self.value = [codingPath: [error]]
     }
 
@@ -13,7 +13,7 @@ public struct KeyedErrors: Error {
     }
 }
 
-public extension Optional where Wrapped == KeyedErrors {
+extension Optional where Wrapped == KeyedErrors {
     mutating func merge(_ other: KeyedErrorsRepresentable?) {
         self = self.merging(other)
     }

@@ -4,22 +4,36 @@ public enum DecodingResult<T> {
 }
 
 public extension DecodingResult {
+    var success: DecodingSuccess<T>? {
+        guard case .success(let success) = self else {
+            return nil
+        }
+        return success
+    }
+
+    var failure: DecodingFailure? {
+        guard case .failure(let failure) = self else {
+            return nil
+        }
+        return failure
+    }
+
     var isAbsent: Bool {
-        guard case .success(let success) = self, success.isAbsent else {
+        guard success?.isAbsent == true else {
             return false
         }
         return true
     }
 
     var isNil: Bool {
-        guard case .success(let success) = self, success.isNil else {
+        guard success?.isNil == true else {
             return false
         }
         return true
     }
 
     var hasValue: Bool {
-        guard case .success(let success) = self, success.hasValue else {
+        guard success?.hasValue == true else {
             return false
         }
         return true
@@ -28,7 +42,7 @@ public extension DecodingResult {
 
 public extension DecodingResult {
     var value: T? {
-        try? unwrapped
+        success?.value
     }
 
     var unwrapped: T {
