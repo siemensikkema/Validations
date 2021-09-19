@@ -16,8 +16,8 @@ struct User: Decodable {
     @Decoded<Address> var address
 }
 
-final class ValidationsTests: XCTestCase {
-    func testValidations() throws {
+final class ValidatorTests: XCTestCase {
+    func testValidatorResultBuilder() throws {
         let decoder = JSONDecoder()
         let data = """
         {
