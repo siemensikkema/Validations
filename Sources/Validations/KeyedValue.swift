@@ -1,9 +1,18 @@
 import Decoded
 
-public typealias KeyedValue<T> = (codingPath: CodingPath, value: T)
+public struct KeyedValue<T> {
+    let codingPath: CodingPath
+    let success: DecodingSuccess<T>
+}
+
+extension KeyedValue {
+    var value: T {
+        success.value
+    }
+}
 
 extension Decoded {
     var keyedValue: KeyedValue<T>? {
-        value.map { KeyedValue(codingPath: codingPath, value: $0) }
+        result.success.map { KeyedValue(codingPath: codingPath, success: $0) }
     }
 }

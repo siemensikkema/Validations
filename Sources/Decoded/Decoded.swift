@@ -50,6 +50,14 @@ public extension KeyedDecodingContainer {
 }
 
 public extension Decoded {
+    var failure: DecodingFailure? {
+        result.failure
+    }
+
+    var success: DecodingSuccess<T>? {
+        result.success
+    }
+
     var value: T? {
         result.value
     }

@@ -31,20 +31,16 @@ extension Validator: ValidatorExpressible {
 }
 
 public extension Validator {
-    init(
-        validate: @escaping (Decoded<T>) -> Error?
-    ) {
-        self.init { decoded in
-            validate(decoded).map { KeyedError(codingPath: decoded.codingPath, error: $0) }
-        }
-    }
-
     init<U>(
         _ keyPath: KeyPath<T, Decoded<U>>,
         validate: @escaping (Decoded<U>) -> Error?
     ) {
         self.init { decoded in
-            decoded.map(keyPath).flatMap(validate)
+            decoded.map(keyPath).flatMap { decoded in
+                validate(decoded).map {
+                    KeyedError(codingPath: decoded.codingPath, error: $0)
+                }
+            }
         }
     }
 

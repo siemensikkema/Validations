@@ -24,7 +24,11 @@ public extension Decoded {
     }
 
     func flatMap<U>(_ f: (T) -> Decoded<U>) -> KeyedValue<U>? {
-        value.map(f).flatMap { decoded in decoded.value.map { value in (decoded.codingPath, value)} }
+        value.map(f).flatMap { decoded in
+            decoded.success.map {
+                .init(codingPath: codingPath, success: $0)
+            }
+        }
     }
 
     func flatMap<U>(_ keyPath: KeyPath<T, Decoded<U>>) -> KeyedValue<U>? {
@@ -32,11 +36,19 @@ public extension Decoded {
     }
 
     func zip<U1, U2>(_ f1: (T) -> U1, _ f2: (T) -> U2) -> (U1, U2)? {
-        map(f1).flatMap { u1 in map(f2).map { u2 in (u1, u2) } }
+        map(f1).flatMap { u1 in
+            map(f2).map { u2 in
+                (u1, u2)
+            }
+        }
     }
 
     func zip<U1, U2>(_ f1: (KeyedValue<T>) -> U1, _ f2: (KeyedValue<T>) -> U2) -> (U1, U2)? {
-        map(f1).flatMap { u1 in map(f2).map { u2 in (u1, u2) } }
+        map(f1).flatMap { u1 in
+            map(f2).map { u2 in
+                (u1, u2)
+            }
+        }
     }
 
     func zip<U1, U2>(_ keyPath1: KeyPath<T, U1>, _ keyPath2: KeyPath<T, U2>) -> (U1, U2)? {
@@ -44,10 +56,18 @@ public extension Decoded {
     }
 
     func flatZip<U1, U2>(_ f1: (T) -> Decoded<U1>, _ f2: (T) -> Decoded<U2>) -> (KeyedValue<U1>, KeyedValue<U2>)? {
-        flatMap(f1).flatMap { u1 in flatMap(f2).map { u2 in (u1, u2) } }
+        flatMap(f1).flatMap { u1 in
+            flatMap(f2).map { u2 in
+                (u1, u2)
+            }
+        }
     }
 
     func flatZip<U1, U2>(_ keyPath1: KeyPath<T, Decoded<U1>>, _ keyPath2: KeyPath<T, Decoded<U2>>) -> (KeyedValue<U1>, KeyedValue<U2>)? {
-        flatMap(keyPath1).flatMap { u1 in flatMap(keyPath2).map { u2 in (u1, u2) } }
+        flatMap(keyPath1).flatMap { u1 in
+            flatMap(keyPath2).map { u2 in
+                (u1, u2)
+            }
+        }
     }
 }
