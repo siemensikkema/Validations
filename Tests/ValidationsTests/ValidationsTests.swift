@@ -79,13 +79,11 @@ struct PresentableErrors {
     let value: [CodingPath: [String]]
 
     init(_ validationErrors: ValidationErrors) {
-        self.value = validationErrors.value.mapValues { errors in
-            errors.map { error in
-                guard let presentableError = error as? PresentableError else {
-                    return "\(error)"
-                }
-                return presentableError.presentableDescription
+        self.value = validationErrors.mapErrors { error in
+            guard let presentableError = error as? PresentableError else {
+                return "\(error)"
             }
+            return presentableError.presentableDescription
         }
     }
 }

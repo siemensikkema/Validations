@@ -68,6 +68,10 @@ extension Decoded {
 
 public struct ValidationErrors: Error {
     public let value: [CodingPath: [Error]]
+
+    public func mapErrors<T>(_ transform: (Error) -> T) -> [CodingPath: [T]] {
+        value.mapValuesEach(transform)
+    }
 }
 
 extension Validated: Decodable where T: Decodable {

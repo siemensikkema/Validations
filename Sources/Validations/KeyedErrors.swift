@@ -3,13 +3,29 @@ import Decoded
 struct KeyedErrors {
     private(set) var value: [CodingPath: [Error]]
 
-    public init(codingPath: CodingPath, error: Error) {
+    private init(value: [CodingPath: [Error]]) {
+        self.value = value
+    }
+
+    init(codingPath: CodingPath, error: Error) {
         self.value = [codingPath: [error]]
     }
 
-    public mutating func merge(_ other: KeyedErrorsRepresentable?) {
+    mutating func merge(_ other: KeyedErrorsRepresentable?) {
         guard let other = other?.keyedErrors else { return }
         value.merge(other.value, uniquingKeysWith: +)
+    }
+
+    func mapErrors(_ transform: (Error) -> Error) -> Self {
+        .init(value: value.mapValuesEach(transform))
+    }
+}
+
+extension Dictionary where Value: Collection {
+    func mapValuesEach<T>(_ transform: (Value.Element) -> T) -> [Key: [T]] {
+        mapValues { value in
+            value.map(transform)
+        }
     }
 }
 
@@ -26,7 +42,7 @@ extension KeyedErrors {
 }
 
 extension KeyedErrors: KeyedErrorsRepresentable {
-    public var keyedErrors: KeyedErrors? {
+    var keyedErrors: KeyedErrors? {
         .init(self)
     }
 }

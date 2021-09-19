@@ -26,8 +26,12 @@ public extension Validator {
     }
 }
 
-extension Validator: ValidatorExpressible {
-    public var validator: Self { self }
+public extension ValidatorExpressible {
+    func mapErrors(_ transform: @escaping (Error) -> Error) -> Validator<T> {
+        .init { decoded in
+            validator(decoded)?.keyedErrors?.mapErrors(transform)
+        }
+    }
 }
 
 public extension Validator {
@@ -144,4 +148,8 @@ public extension Validator {
                 .flatMap(buildValidator().validate)
         }
     }
+}
+
+extension Validator: ValidatorExpressible {
+    public var validator: Self { self }
 }
