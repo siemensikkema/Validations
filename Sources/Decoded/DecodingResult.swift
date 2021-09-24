@@ -71,13 +71,13 @@ extension DecodingResult: Equatable where T: Equatable {}
 extension DecodingResult: Hashable where T: Hashable {}
 
 public extension Sequence {
-    func unwrapped<T>() throws -> [T] where Element == DecodingResult<T> {
+    func unwrapped<T>() throws -> [T] where Element == Decoded<T> {
         try map { try $0.unwrapped }
     }
 }
 
 public extension Dictionary {
-    func unwrapped<T>() throws -> [Key: T] where Value == DecodingResult<T> {
+    func unwrapped<T>() throws -> [Key: T] where Value == Decoded<T> {
         try mapValues { try $0.unwrapped }
     }
 }

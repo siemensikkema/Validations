@@ -3,17 +3,17 @@ import Decoded
 import XCTest
 
 struct Address: Decodable {
-    @Decoded<String> var street
-    @Decoded<String?> var line2
-    @Decoded<String> var city
-    @Decoded<String> var region
-    @Decoded<String> var postcode
+    var street: Decoded<String>
+    var line2: Decoded<String?>
+    var city: Decoded<String>
+    var region: Decoded<String>
+    var postcode: Decoded<String>
 }
 
 struct User: Decodable {
-    @Decoded<String> var email
-    @Decoded<String> var name
-    @Decoded<Address> var address
+    var email: Decoded<String>
+    var name: Decoded<String>
+    var address: Decoded<Address>
 }
 
 final class ValidatorTests: XCTestCase {
@@ -40,27 +40,27 @@ final class ValidatorTests: XCTestCase {
 
         let decoded = try decoder.decode(Decoded<User>.self, from: data)
         let validator = Validator<User> {
-            \.$name == "asd"
+            \.name == "asd"
 
-            ValidEmail(\.$email)
+            ValidEmail(\.email)
 
             Validator {
-                \.$name != \.$email
+                \.name != \.email
             }.or {
-                \.$name == "ab@b.com"
+                \.name == "ab@b.com"
             }
 
-            Validator(withValueAt: \.$name) { name in
-                \.$email != name
+            Validator(withValueAt: \.name) { name in
+                \.email != name
             }
 
-            Validator(nestedAt: \.$address) {
-                \.$street == "a"
-                \.$line2 == nil
-                IsNil(\.$line2)
-                \.$city == "b"
-                \.$region == "c"
-                \.$postcode == "1234"
+            Validator(nestedAt: \.address) {
+                \.street == "a"
+                \.line2 == nil
+                IsNil(\.line2)
+                \.city == "b"
+                \.region == "c"
+                \.postcode == "1234"
             }.mapErrors { _ in TestError() }
         }
 

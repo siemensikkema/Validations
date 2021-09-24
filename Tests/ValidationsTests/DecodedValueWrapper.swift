@@ -2,7 +2,7 @@ import Decoded
 
 /// A wrapper for using non-object-like values such as primitives and collections in a `Validated` context.
 public struct DecodedValueWrapper<T> {
-    @Decoded<T> public var value
+    public var value: Decoded<T>
 }
 
 extension DecodedValueWrapper: Decodable where T: Decodable {

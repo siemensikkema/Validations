@@ -2,52 +2,47 @@ import Decoded
 
 @dynamicMemberLookup
 public struct Validated<T> {
-    let decodingSuccess: DecodingSuccess<T>
+    let decoded: Decoded<T>
 
-    fileprivate init(_ result: DecodingResult<T>) throws {
-        switch result {
-        case .success(let success):
-            self.decodingSuccess = success
-        case .failure(let failure):
-            throw failure
-        }
+    fileprivate init(_ decoded: Decoded<T>) throws {
+        self.decoded = decoded
     }
 }
 
 public extension Validated {
     private var value: T {
-        decodingSuccess.value
+        try! decoded.unwrapped
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
         value[keyPath: keyPath]
     }
 
-    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>>) -> Validated<U> {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> Validated<U> {
         try! .init(value[keyPath: keyPath])
     }
 
-    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>>) -> U {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> U {
         value[keyPath: keyPath].value!
     }
 
-    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>?>) -> Validated<U>? {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>?>) -> Validated<U>? {
         try! value[keyPath: keyPath].map(Validated<U>.init)
     }
 
-    subscript<U>(dynamicMember keyPath: KeyPath<T, DecodingResult<U>?>) -> U? {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>?>) -> U? {
         value[keyPath: keyPath]?.value!
     }
 }
 
 public extension Validated where T: Sequence {
-    func unwrapped<U>() -> [U] where T.Element == DecodingResult<U> {
+    func unwrapped<U>() -> [U] where T.Element == Decoded<U> {
         try! value.unwrapped()
     }
 }
 
 public extension Validated {
-    func unwrapped<Key, Value>() -> [Key: Value] where T == [Key: DecodingResult<Value>] {
+    func unwrapped<Key, Value>() -> [Key: Value] where T == [Key: Decoded<Value>] {
         try! value.unwrapped()
     }
 }
@@ -62,7 +57,7 @@ extension Decoded {
             throw keyedErrors
         }
 
-        return try .init(result)
+        return try .init(self)
     }
 }
 

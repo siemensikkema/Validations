@@ -1,12 +1,8 @@
-@propertyWrapper
 public struct Decoded<T> {
-    public init(codingPath: CodingPath = [], result: DecodingResult<T> = .success(.absent)) {
+    public init(codingPath: CodingPath = [], result: DecodingResult<T>) {
         self.codingPath = codingPath
         self.result = result
     }
-
-    public var projectedValue: Self { self }
-    public var wrappedValue: DecodingResult<T> { result }
 
     public let codingPath: CodingPath
     public let result: DecodingResult<T>

@@ -12,7 +12,7 @@ final class ValidatedTests: XCTestCase {
 
     func test_directPropertyAccess() throws {
         struct Gadget: Decodable {
-            @Decoded<String> var name
+            var name: Decoded<String>
         }
 
         let decoded: Decoded<Gadget> = try decode(#"{"name":"arduino"}"#)
@@ -23,9 +23,9 @@ final class ValidatedTests: XCTestCase {
     func test_directPropertyAccess_nested() throws {
         struct CarRequest: Decodable {
             struct Engine: Decodable {
-                @Decoded<Double> var cylinderVolume
+                var cylinderVolume: Decoded<Double>
             }
-            @Decoded<Engine> var engine
+            var engine: Decoded<Engine>
         }
 
         let decoded: Decoded<CarRequest> = try decode(#"{"engine":{"cylinderVolume": 0.9}}"#)
@@ -48,14 +48,14 @@ final class ValidatedTests: XCTestCase {
     func test_nameConflictWithState() throws {
         struct City: Decodable {
             struct State: Decodable {
-                @Decoded<String> var name
+                var name: Decoded<String>
             }
-            @Decoded<State> var state
+            var state: Decoded<State>
         }
         let decoded: Decoded<City> = try decode(#"{"state":{"name":"NY"}}"#)
         let validated = try decoded.validated()
         XCTAssertEqual(validated.state.name, "NY")
-        XCTAssertEqual(validated.$state.codingPath, ["state"])
+        XCTAssertEqual(validated.state.codingPath, ["state"])
     }
 
     func test_directDecoding() throws {
@@ -64,7 +64,7 @@ final class ValidatedTests: XCTestCase {
     }
 
     func test_array() throws {
-        let validated: Validated<[DecodingResult<Int>]> = try decode("[1,2,3]")
+        let validated: Validated<[Decoded<Int>]> = try decode("[1,2,3]")
         XCTAssertEqual(validated.count, 3)
         XCTAssertEqual(validated[0], 1)
         XCTAssertEqual(validated.first, 1)
@@ -74,7 +74,7 @@ final class ValidatedTests: XCTestCase {
     }
 
     func test_dictionary() throws {
-        let validated: Validated<[String: DecodingResult<Int>]> = try decode(#"{"a":1}"#)
+        let validated: Validated<[String: Decoded<Int>]> = try decode(#"{"a":1}"#)
         XCTAssertEqual(validated.count, 1)
         XCTAssertEqual(validated["a"], 1)
 
