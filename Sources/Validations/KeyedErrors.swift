@@ -1,13 +1,19 @@
 import Decoded
 
-struct KeyedErrors {
-    private(set) var value: [CodingPath: [Error]]
+public typealias KeyedErrors = KeyedValues<Error>
 
-    private init(value: [CodingPath: [Error]]) {
+public struct KeyedValues<T> {
+    public private(set) var value: [CodingPath: [T]]
+
+    private init(_ value: [CodingPath: [T]]) {
         self.value = value
     }
+}
 
-    init(codingPath: CodingPath, error: Error) {
+extension KeyedErrors: Error {}
+
+extension KeyedErrors {
+    init(codingPath: CodingPath, error: T) {
         self.value = [codingPath: [error]]
     }
 
@@ -16,8 +22,8 @@ struct KeyedErrors {
         value.merge(other.value, uniquingKeysWith: +)
     }
 
-    func mapErrors(_ transform: (Error) -> Error) -> Self {
-        .init(value: value.mapValuesEach(transform))
+    public func mapErrors<U>(_ transform: (T) -> U) -> KeyedValues<U> {
+        .init(value.mapValuesEach(transform))
     }
 }
 

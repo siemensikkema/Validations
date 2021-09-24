@@ -32,6 +32,12 @@ final class ValidatorTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
+        struct TestError: Error, PresentableError {
+            var presentableDescription: String {
+                "customized!"
+            }
+        }
+
         let decoded = try decoder.decode(Decoded<User>.self, from: data)
         let validator = Validator<User> {
             \.$name == "asd"
@@ -55,49 +61,19 @@ final class ValidatorTests: XCTestCase {
                 \.$city == "b"
                 \.$region == "c"
                 \.$postcode == "1234"
-            }
+            }.mapErrors { _ in TestError() }
         }
 
         do {
             let validated = try decoded.validated(by: validator)
             let name: String = validated.name
             print(name)
-        } catch let error as ValidationErrors {
-            let presentable = PresentableErrors(error)
+        } catch let errors as KeyedErrors {
+            let presentable = PresentableErrors(errors)
             print(presentable)
             XCTFail(presentable.description)
         }
     }
-}
-
-/// A basic example of processing validation errors to make them presentable to an end-user.
-///
-/// More advanced approaches could involve scanning for errors conforming to some protocol to output:
-/// - error codes or translation keys (possibly including dynamic data) for client side translation
-/// - server-side translated errors based on a language code in the request's `Accept` header.
-struct PresentableErrors {
-    let value: [CodingPath: [String]]
-
-    init(_ validationErrors: ValidationErrors) {
-        self.value = validationErrors.mapErrors { error in
-            guard let presentableError = error as? PresentableError else {
-                return "\(error)"
-            }
-            return presentableError.presentableDescription
-        }
-    }
-}
-
-extension PresentableErrors: CustomStringConvertible {
-    var description: String {
-        value.flatMap { codingPath, errors in
-            ["\(codingPath.dotPath):"] + errors.map { " - \($0)" }
-        }.joined(separator: "\n")
-    }
-}
-
-protocol PresentableError {
-    var presentableDescription: String { get }
 }
 
 /**

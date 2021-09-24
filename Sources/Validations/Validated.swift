@@ -59,18 +59,10 @@ extension Decoded {
 
     func validated(mergingErrors additional: KeyedErrorsRepresentable?) throws -> Validated<T> {
         if let keyedErrors = keyedErrors.merging(additional) {
-            throw ValidationErrors(value: keyedErrors.value)
+            throw keyedErrors
         }
 
         return try .init(result)
-    }
-}
-
-public struct ValidationErrors: Error {
-    public let value: [CodingPath: [Error]]
-
-    public func mapErrors<T>(_ transform: (Error) -> T) -> [CodingPath: [T]] {
-        value.mapValuesEach(transform)
     }
 }
 

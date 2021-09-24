@@ -37,8 +37,8 @@ final class ValidatedTests: XCTestCase {
         let decoded: Decoded<String> = try decode("0")
 
         XCTAssertThrowsError(try decoded.validated()) { error in
-            guard let error = error as? ValidationErrors else {
-                XCTFail("expected error of type `KeyedErrors`")
+            guard let error = error as? KeyedErrors else {
+                XCTFail("expected error of type `ValidationErrors`")
                 return
             }
             XCTAssertTrue(error.value.values.first?.first is DecodingFailure)
