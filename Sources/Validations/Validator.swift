@@ -62,13 +62,13 @@ public extension Validator {
     init<U>(
         _ keyPath1: KeyPath<T, Decoded<U>>,
         _ keyPath2: KeyPath<T, Decoded<U>>,
-        validate: @escaping (KeyedValue<U>, KeyedValue<U>) -> Error?
+        validate: @escaping (KeyedSuccess<U>, KeyedSuccess<U>) -> Error?
     ) {
         self.init { decoded in
             decoded.value.flatMap {
                 guard
-                    let lhs = $0[keyPath: keyPath1].keyedValue,
-                    let rhs = $0[keyPath: keyPath2].keyedValue
+                    let lhs = $0[keyPath: keyPath1].keyedSuccess,
+                    let rhs = $0[keyPath: keyPath2].keyedSuccess
                 else {
                     return nil
                 }
@@ -81,12 +81,12 @@ public extension Validator {
 
     init<U>(
         withValueAt keyPath: KeyPath<T, Decoded<U>>,
-        @ValidatorBuilder<T> buildValidator: @escaping (KeyedValue<U>) -> Self
+        @ValidatorBuilder<T> buildValidator: @escaping (KeyedSuccess<U>) -> Self
     ) {
         self.init { decoded in
             decoded
                 .flatMap(keyPath)
-                .keyedValue
+                .keyedSuccess
                 .flatMap(buildValidator)?(decoded)
         }
     }
