@@ -1,4 +1,3 @@
-import Common
 import Decoded
 import XCTest
 

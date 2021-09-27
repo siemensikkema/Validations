@@ -20,18 +20,13 @@ let package = Package(
             name: "Validations",
             dependencies: ["Decoded"]
         ),
-        .target(
-            name: "Common",
-            dependencies: ["Decoded"],
-            path: "Tests/Common"
-        ),
         .testTarget(
             name: "DecodedTests",
-            dependencies: ["Decoded", "Common"]
+            dependencies: ["Decoded"]
         ),
         .testTarget(
             name: "ValidationsTests",
-            dependencies: ["Validations", "Common"]
+            dependencies: ["Validations"]
         ),
     ]
 )
