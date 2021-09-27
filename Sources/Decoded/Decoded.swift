@@ -1,3 +1,4 @@
+@dynamicMemberLookup
 public struct Decoded<T> {
     public init(codingPath: CodingPath = [], result: DecodingResult<T>) {
         self.codingPath = codingPath
@@ -17,6 +18,17 @@ extension Decoded: Decodable where T: Decodable {
 
 extension Decoded: Hashable where T: Hashable {}
 extension Decoded: Equatable where T: Equatable {}
+
+public extension Decoded {
+    subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> Decoded<U> {
+        switch result {
+        case .failure(let failure):
+            return .init(codingPath: codingPath, result: .failure(failure))
+        case .success(let success):
+            return success.value[keyPath: keyPath]
+        }
+    }
+}
 
 public extension KeyedDecodingContainer {
     func decode<T: Decodable>(
