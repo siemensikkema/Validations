@@ -4,8 +4,8 @@ public struct IsNil<T>: ValidatorExpressible {
     public enum Error: Swift.Error {
         case hasValue, isAbsent
 
-        init?<U>(_ result: DecodingResult<U>) {
-            switch result.success {
+        init?<U>(_ success: DecodingSuccess<U>) {
+            switch success {
             case .absent:
                 self = .isAbsent
             case .value:
@@ -19,6 +19,6 @@ public struct IsNil<T>: ValidatorExpressible {
     public let validator: Validator<T>
 
     public init<U>(_ keyPath: KeyPath<T, Decoded<U>>) {
-        self.validator = .init(keyPath) { Error($0.result) }
+        self.validator = .init(keyPath, validate: Error.init)
     }
 }
