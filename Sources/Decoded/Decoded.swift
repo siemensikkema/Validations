@@ -1,6 +1,6 @@
 @dynamicMemberLookup
 public struct Decoded<T> {
-    public init(codingPath: CodingPath = [], result: DecodingResult<T>) {
+    init(codingPath: CodingPath = [], result: DecodingResult<T>) {
         self.codingPath = codingPath
         self.result = result
     }
