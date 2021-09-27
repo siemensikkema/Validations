@@ -49,12 +49,12 @@ public extension Validated {
 
 extension Decoded {
     public func validated() throws -> Validated<T> {
-        try validated(mergingErrors: nil)
+        try validated(mergingFailures: nil)
     }
 
-    func validated(mergingErrors additional: KeyedErrorsRepresentable?) throws -> Validated<T> {
-        if let keyedErrors = keyedErrors.merging(additional) {
-            throw keyedErrors
+    func validated(mergingFailures additional: KeyedFailuresRepresentable?) throws -> Validated<T> {
+        if let keyedFailures = keyedFailures.merging(additional) {
+            throw keyedFailures
         }
 
         return try .init(self)

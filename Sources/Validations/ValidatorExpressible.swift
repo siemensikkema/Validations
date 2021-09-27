@@ -6,14 +6,14 @@ public protocol ValidatorExpressible {
 }
 
 extension ValidatorExpressible {
-    func callAsFunction(_ decoded: Decoded<T>) -> KeyedErrorsRepresentable? {
+    func callAsFunction(_ decoded: Decoded<T>) -> KeyedFailuresRepresentable? {
         validator.validate(decoded)
     }
 }
 
 public extension ValidatorExpressible {
     func or(@ValidatorBuilder<T> buildValidator: @escaping () -> Validator<T>) -> Validator<T> {
-        .init { decoded -> KeyedErrorsRepresentable? in
+        .init { decoded -> KeyedFailuresRepresentable? in
             guard
                 let lhs = validator(decoded),
                 let rhs = buildValidator()(decoded)

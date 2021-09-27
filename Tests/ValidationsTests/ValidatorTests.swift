@@ -32,7 +32,7 @@ final class ValidatorTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        struct TestError: Error, PresentableError {
+        struct TestFailure: ValidationFailure, PresentableFailure {
             var presentableDescription: String {
                 "customized!"
             }
@@ -61,15 +61,15 @@ final class ValidatorTests: XCTestCase {
                 \.city == "b"
                 \.region == "c"
                 \.postcode == "1234"
-            }.mapErrors { _ in TestError() }
+            }.mapFailures { _ in TestFailure() }
         }
 
         do {
             let validated = try decoded.validated(by: validator)
             let name: String = validated.name
             print(name)
-        } catch let errors as KeyedErrors {
-            let presentable = PresentableErrors(errors)
+        } catch let failures as KeyedFailures {
+            let presentable = PresentableFailures(failures)
             print(presentable)
             XCTFail(presentable.description)
         }

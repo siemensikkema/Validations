@@ -36,8 +36,8 @@ public struct ValidatorBuilder<T> {
         validator.validator
     }
 
-    public static func buildExpression(_ expression: KeyedError) -> Validator<T> {
-        .init { _ in expression.keyedErrors }
+    public static func buildExpression(_ expression: KeyedFailure) -> Validator<T> {
+        .init { _ in expression.keyedFailures }
     }
 
     public static func buildLimitedAvailability<V>(_ validator: V) -> Validator<T>

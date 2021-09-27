@@ -1,7 +1,7 @@
 import Decoded
 
 public struct Validator<T> {
-    typealias Validate = (Decoded<T>) -> KeyedErrorsRepresentable?
+    typealias Validate = (Decoded<T>) -> KeyedFailuresRepresentable?
 
     let validate: Validate
 
@@ -19,7 +19,7 @@ public extension Validator {
 public extension Validator {
     init<V>(_ validators: [V]) where V: ValidatorExpressible, V.T == T {
         self.init { decoded in
-            validators.reduce(into: nil) { (partialResult: inout KeyedErrors?, validator) in
+            validators.reduce(into: nil) { (partialResult: inout KeyedFailures?, validator) in
                 partialResult.merge(validator(decoded))
             }
         }
@@ -27,9 +27,9 @@ public extension Validator {
 }
 
 public extension ValidatorExpressible {
-    func mapErrors(_ transform: @escaping (Error) -> Error) -> Validator<T> {
+    func mapFailures(_ transform: @escaping (ValidationFailure) -> ValidationFailure) -> Validator<T> {
         .init { decoded in
-            validator(decoded)?.keyedErrors?.mapErrors(transform)
+            validator(decoded)?.keyedFailures?.mapFailures(transform)
         }
     }
 }
@@ -37,7 +37,7 @@ public extension ValidatorExpressible {
 public extension Validator {
     init<U>(
         _ keyPath: KeyPath<T, Decoded<U>>,
-        validate: @escaping (DecodingSuccess<U>) -> Error?
+        validate: @escaping (DecodingSuccess<U>) -> ValidationFailure?
     ) {
         self.init { decoded in
             decoded
@@ -45,14 +45,14 @@ public extension Validator {
                 .success
                 .flatMap(validate)
                 .map {
-                    KeyedError(codingPath: decoded.codingPath, error: $0)
+                    KeyedFailure(codingPath: decoded.codingPath, failure: $0)
                 }
         }
     }
 
     init<U>(
         _ keyPath: KeyPath<T, Decoded<U>>,
-        validate: @escaping (U) -> Error?
+        validate: @escaping (U) -> ValidationFailure?
     ) {
         self.init(keyPath) { success in
             validate(success.value)
@@ -62,7 +62,7 @@ public extension Validator {
     init<U>(
         _ keyPath1: KeyPath<T, Decoded<U>>,
         _ keyPath2: KeyPath<T, Decoded<U>>,
-        validate: @escaping (KeyedSuccess<U>, KeyedSuccess<U>) -> Error?
+        validate: @escaping (KeyedSuccess<U>, KeyedSuccess<U>) -> ValidationFailure?
     ) {
         self.init { decoded in
             decoded.value.flatMap {
@@ -73,7 +73,7 @@ public extension Validator {
                     return nil
                 }
                 return validate(lhs, rhs).flatMap {
-                    KeyedError(codingPath: lhs.codingPath, error: $0)
+                    KeyedFailure(codingPath: lhs.codingPath, failure: $0)
                 }
             }
         }
