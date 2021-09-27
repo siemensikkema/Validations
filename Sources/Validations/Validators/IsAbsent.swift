@@ -19,6 +19,6 @@ public struct IsAbsent<T>: ValidatorExpressible {
     public let validator: Validator<T>
 
     public init<U>(_ keyPath: KeyPath<T, Decoded<U>>) {
-        self.validator = .init(keyPath, validate: Failure.init)
+        self.validator = .init(keyPath) { Failure($0.success) }
     }
 }

@@ -37,15 +37,16 @@ public extension ValidatorExpressible {
 public extension Validator {
     init<U>(
         _ keyPath: KeyPath<T, Decoded<U>>,
-        validate: @escaping (DecodingSuccess<U>) -> ValidationFailure?
+        validate: @escaping (KeyedSuccess<U>) -> ValidationFailure?
     ) {
         self.init { decoded in
             decoded
                 .flatMap(keyPath)
-                .success
-                .flatMap(validate)
-                .map {
-                    KeyedFailure(codingPath: decoded.codingPath, failure: $0)
+                .keyedSuccess
+                .flatMap { success in
+                    validate(success).map {
+                        KeyedFailure(codingPath: success.codingPath, failure: $0)
+                    }
                 }
         }
     }
