@@ -28,7 +28,7 @@ public extension Decoded {
     func flatMap<U>(_ f: (T) -> Decoded<U>) -> KeyedValue<U>? {
         value.map(f).flatMap { decoded in
             decoded.success.map {
-                .init(codingPath: codingPath, success: $0)
+                .init(codingPath: decoded.codingPath, success: $0)
             }
         }
     }
