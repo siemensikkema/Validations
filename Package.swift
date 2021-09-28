@@ -10,18 +10,11 @@ let package = Package(
         ),
     ],
     dependencies: [
+        .package(name: "Decoded", url: "https://github.com/siemensikkema/Decoded.git", from: "0.1.0")
     ],
     targets: [
         .target(
-            name: "Decoded",
-            dependencies: []
-        ),
-        .target(
             name: "Validations",
-            dependencies: ["Decoded"]
-        ),
-        .testTarget(
-            name: "DecodedTests",
             dependencies: ["Decoded"]
         ),
         .testTarget(
