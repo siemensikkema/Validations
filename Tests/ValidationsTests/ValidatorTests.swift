@@ -1,23 +1,32 @@
-import Validations
 import Decoded
+import Validations
 import XCTest
 
-struct Address: Decodable {
-    var street: Decoded<String>
-    var line2: Decoded<String?>
-    var city: Decoded<String>
-    var region: Decoded<String>
-    var postcode: Decoded<String>
-}
+final class ValidatorTests: ValidationsTestCase {
+    func test_basic_validator_success() throws {
+        let decoded: Decoded<DecodedValueWrapper<Int>> = try decode("0")
+        let validator = Validator<DecodedValueWrapper<Int>>(\.value) { (value: KeyedSuccess) in
+            nil
+        }
+        XCTAssertNoThrow(try decoded.validated(by: validator))
+    }
 
-struct User: Decodable {
-    var email: Decoded<String>
-    var name: Decoded<String>
-    var address: Decoded<Address>
-}
+    func test_presentable_decoded_errors() throws {
+        struct NonOptionalName: Decodable {
+            let name: Decoded<String>
+        }
 
-final class ValidatorTests: XCTestCase {
-    func testValidatorResultBuilder() throws {
+        let decoded: Decoded<NonOptionalName> = try decode(#"{"name":null}"#)
+
+        do {
+            try decoded.validated()
+        } catch let failures as KeyedFailures {
+            let presentable = PresentableFailures(failures)
+            print(presentable)
+        }
+    }
+
+    func test_validatorResultBuilder() throws {
         let decoder = JSONDecoder()
         let data = """
         {
@@ -77,3 +86,18 @@ final class ValidatorTests: XCTestCase {
         }
     }
 }
+
+struct Address: Decodable {
+    var street: Decoded<String>
+    var line2: Decoded<String?>
+    var city: Decoded<String>
+    var region: Decoded<String>
+    var postcode: Decoded<String>
+}
+
+struct User: Decodable {
+    var email: Decoded<String>
+    var name: Decoded<String>
+    var address: Decoded<Address>
+}
+

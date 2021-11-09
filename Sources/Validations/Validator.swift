@@ -1,5 +1,8 @@
 import Decoded
 
+/// Able to validate a `Decoded<T>` value.
+///
+/// As the basic building block for Validations, ``Validator``s can be composed with others to form arbitrarily complex validations of a type `T`.
 public struct Validator<T> {
     typealias Validate = (Decoded<T>) -> KeyedFailuresRepresentable?
 
@@ -7,6 +10,11 @@ public struct Validator<T> {
 
     init(validate: @escaping Validate) {
         self.validate = validate
+    }
+
+    /// A ``Validator`` that always succeeds.
+    public static var empty: Self {
+        .init { _ in nil }
     }
 }
 

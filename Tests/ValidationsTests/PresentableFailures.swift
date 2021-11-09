@@ -1,3 +1,4 @@
+import Decoded
 import Validations
 
 /// A basic example of processing validation failures to make them presentable to an end-user.
@@ -11,6 +12,10 @@ extension PresentableFailures {
     init(_ keyedFailures: KeyedFailures) {
         self = keyedFailures.mapFailures(\.presentableDescription)
     }
+}
+
+protocol PresentableFailure {
+    var presentableDescription: String { get }
 }
 
 extension ValidationFailure {
@@ -30,6 +35,17 @@ extension PresentableFailures: CustomStringConvertible {
     }
 }
 
-protocol PresentableFailure {
-    var presentableDescription: String { get }
+extension DecodingFailure: PresentableFailure {
+    var presentableDescription: String {
+        switch errorType {
+        case .dataCorrupted:
+            return "Data corrupted"
+        case .keyNotFound:
+            return "Key not found"
+        case .typeMismatch:
+            return "Type mismatch"
+        case .valueNotFound:
+            return "Value not found"
+        }
+    }
 }

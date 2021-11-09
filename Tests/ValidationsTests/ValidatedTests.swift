@@ -2,7 +2,7 @@ import Decoded
 import Validations
 import XCTest
 
-final class ValidatedTests: XCTestCase {
+final class ValidatedTests: ValidationsTestCase {
     func test_singleValue() throws {
         let decoded: Decoded<DecodedValueWrapper<Int>> = try decode("0")
         let validated = try decoded.validated()

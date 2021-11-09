@@ -4,7 +4,7 @@ public struct ValidEmail<T>: ValidatorExpressible {
     public struct Failure: ValidationFailure {
         init?(email: String) {
             // FIXME: this is a proof of concept implementation
-            guard email.contains("@") else {
+            guard !email.contains("@") else {
                 return nil
             }
         }
