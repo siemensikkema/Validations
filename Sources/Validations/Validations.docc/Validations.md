@@ -1,6 +1,6 @@
 # ``Validations``
 
-Type-safe and composable validations with flexible error output.       
+Type-safe and composable validations with versatile output.       
 
 ## Overview
 

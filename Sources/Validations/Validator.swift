@@ -2,7 +2,7 @@ import Decoded
 
 /// Able to validate a `Decoded<T>` value.
 ///
-/// As the basic building block for Validations, ``Validator``s can be composed with others to form arbitrarily complex validations of a type `T`.
+/// As the basic building block for Validations, ``Validator``s can be composed with others to form arbitrarily complex validators.
 public struct Validator<T> {
     typealias Validate = (Decoded<T>) -> KeyedFailuresRepresentable?
 
@@ -111,16 +111,33 @@ public extension Validator {
 
     init<U>(
         nestedAt keyPath: KeyPath<T, Decoded<U>>,
-        @ValidatorBuilder<U> buildValidator: @escaping () -> Validator<U>
+        validator: Validator<U>
     ) {
         self.init { decoded in
             let nested = decoded.flatMap(keyPath)
 
             guard nested.success != nil else { return nil }
 
-            return buildValidator().validate(nested)
+            return validator(nested)
         }
     }
+
+    init<U>(
+        nestedAt keyPath: KeyPath<T, Decoded<U>>,
+        @ValidatorBuilder<U> buildValidator: @escaping () -> Validator<U>
+    ) {
+        self.init(nestedAt: keyPath, validator: buildValidator())
+    }
+
+    init<U>(
+        nestedAt keyPath: KeyPath<T, Decoded<U>>,
+        failure: ValidationFailure
+    ) {
+        self.init(nestedAt: keyPath, validator: .init { decoded in
+            KeyedFailure(codingPath: decoded.codingPath, failure: failure)
+        })
+    }
+
 }
 
 extension Validator: ValidatorExpressible {

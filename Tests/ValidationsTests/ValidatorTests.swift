@@ -19,7 +19,7 @@ final class ValidatorTests: ValidationsTestCase {
         let decoded: Decoded<NonOptionalName> = try decode(#"{"name":null}"#)
 
         do {
-            try decoded.validated()
+            _ = try decoded.validated()
         } catch let failures as KeyedFailures {
             let presentable = PresentableFailures(failures)
             print(presentable)

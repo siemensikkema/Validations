@@ -5,10 +5,11 @@ import XCTest
 /// Examples of real-world use-cases
 final class ValidationsTests: ValidationsTestCase {
     /// Demonstrates how to validate a password reset scenario.
-    func test_passwordReset() throws {
+    @available(macOS 12.0.0, *)
+    func test_passwordReset() async throws {
         struct ResetPasswordPayload: Decodable {
             let email: Decoded<String>
-            let currentPassword: Decoded<String>
+            let password: Decoded<String>
             let newPassword: Decoded<String>
             let confirmation: Decoded<String>
         }
@@ -16,44 +17,41 @@ final class ValidationsTests: ValidationsTestCase {
         let data = """
         {
             "email": "a@b.com",
-            "currentPassword": "secret1",
+            "password": "secret1",
             "newPassword": "secret2",
             "confirmation": "secret2"
         }
         """
         let payload: Decoded<ResetPasswordPayload> = try decode(data)
 
-        let validator = Validator<ResetPasswordPayload> {
-            ValidEmail(\.email)
-            \.newPassword == \.confirmation
-        }
-
-        struct PasswordMismatch: ValidationFailure {}
-
-        let passwordMismatchFailure: PasswordMismatch? = nil
-
-//        if
-//            let email = payload.email.value,
-//            let currentPassword = payload.currentPassword.value
-//        {
-//            // 1. Look up user by email
-//            // 2. Validate password
-//            passwordMismatchFailure = nil
-//        } else {
-//            passwordMismatchFailure = nil
-//        }
-
-        let currentPasswordValidator = Validator<ResetPasswordPayload>(\.currentPassword) { (_: KeyedSuccess<String>) in
-            passwordMismatchFailure
-        }
+        let credentialFailure = await verifyCredentials(for: payload.email.value, password: payload.password.value)
 
         do {
-            let validated = try payload.validated(by: validator, currentPasswordValidator)
+            let validated = try payload.validated {
+                \.newPassword.count > 8
+                \.confirmation == \.newPassword
+
+                if let failure = credentialFailure {
+                    Validator(nestedAt: \.email, failure: failure)
+                }
+            }
             XCTAssertEqual(validated.newPassword, "secret2")
-            // assign password to user ...
         } catch let failures as KeyedFailures {
             let presentable = PresentableFailures(failures)
             XCTFail(presentable.description)
         }
     }
+}
+
+fileprivate struct InvalidCredentials: ValidationFailure {}
+
+@available(macOS 12.0.0, *)
+fileprivate func verifyCredentials(for email: String?, password: String?) async -> ValidationFailure? {
+    guard let _ = email, let _ = password else {
+        return nil
+    }
+
+    // in a real implementation we'd look the credentials for the email and verify the password against the stored hash
+
+    return InvalidCredentials()
 }

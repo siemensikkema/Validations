@@ -6,6 +6,13 @@ public struct ValidatorBuilder<T> {
         .init(validators)
     }
 
+    public static func buildOptional(_ validator: Validator<T>?) -> Validator<T>
+    {
+        .init { decoded in
+            validator?(decoded)
+        }
+    }
+
     public static func buildOptional<V>(_ validator: V?) -> Validator<T>
         where V: ValidatorExpressible, V.T == T
     {

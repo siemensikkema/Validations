@@ -1,12 +1,12 @@
 import Decoded
 
 public extension Decoded {
-    func validated(by validators: Validator<T> ...) throws -> Validated<T> {
-        try validated(by: Validator(validators))
+    func validated() throws -> Validated<T> {
+        try validated(mergingFailures: nil)
     }
 
-    func validated(by validator: Validator<T>) throws -> Validated<T> {
-        try validated(mergingFailures: validator(self))
+    func validated<V>(by validators: V ...) throws -> Validated<T> where V: ValidatorExpressible, V.T == T {
+        try validated(mergingFailures: Validator(validators)(self))
     }
 
     func validated(@ValidatorBuilder<T> buildValidator: () -> Validator<T>) throws -> Validated<T> {
