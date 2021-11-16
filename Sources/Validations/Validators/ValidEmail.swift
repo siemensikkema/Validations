@@ -13,6 +13,6 @@ public struct ValidEmail<T>: ValidatorExpressible {
     public let validator: Validator<T>
 
     public init(_ keyPath: KeyPath<T, Decoded<String>>) {
-        self.validator = .init(keyPath, validate: Failure.init)
+        self.validator = .init(keyPath) { Failure(email: $0.value) }
     }
 }

@@ -4,8 +4,6 @@ Define the validation rules that your data should adhere to.
 
 We will use a fictional reset password feature as an example since it enables us to explore various interesting aspects of validation.
 
-> Important: This example is chosen to highlight `Validations`' features and not intended to be a best practice for building a password reset implementation.
-
 Consider the following input:
 
 ```swift
@@ -25,11 +23,13 @@ There are several preconditions that the payload needs to meet before we can acc
 3. `confirmation` equals the value of the `newPassword`
 4. `password` matches the current password of the user with the given email address
 
-More generally these correspond to validating:
+More generally these correspond to validating ...
 1. the structure
 2. a single field
 3. a relationship between fields
 4. against an external state
+
+> Warning: This example is chosen to highlight `Validations`' features and not intended to be a best practice for building a password reset implementation.
 
 ## Representing the payload
 
@@ -83,7 +83,7 @@ If we just want to validate that the _structure_ of our input is correct, valida
 let validated = try request.validated() // Validated<ResetPasswordRequest>
 ```
 
-> See <#insert link#> on how to use the values in the (now validated) payload and  <#insert link#> on how to handle any resulting validation failures.
+> See ``Validated`` on how to use the values in the (now validated) payload and ``KeyedFailures`` on how to handle any resulting validation failures.
 
 ### 2. Validating a single field
 
@@ -97,7 +97,7 @@ let validated = try request.validated {
 
 The new validation will fail if `newPassword` is present and of the correct type but its `count` is less than eight characters.
 
-> See <#insert link#> for available validations.
+> See ``Validator`` for available validations.
 
 ### 3. Validating a relationship between fields
 
@@ -136,7 +136,7 @@ let validated = try payload.validated {
     }
 }
 ```
-> Note that we're associating the failure with the _email_ field. The failure could indicate either an incorrect email address or an incorrect password and we don't want to give any hints to potential bad actors. 
+> We're associating the failure with the _email_ field. The failure could indicate either an incorrect email address or an incorrect password and we don't want to give any hints to potential bad actors. 
 
 An alternative way to approach this would be to split the validation into two validators and combining them at the validation step.
 

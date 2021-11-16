@@ -1,5 +1,6 @@
 import Decoded
 
+/// A value that is guaranteed to have passed some validation.
 @dynamicMemberLookup
 public struct Validated<T> {
     let decoded: Decoded<T>
@@ -10,40 +11,42 @@ public struct Validated<T> {
 }
 
 public extension Validated {
-    private var value: T {
+    /// Unwraps the validated value.
+    var unwrapped: T {
         try! decoded.unwrapped
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
-        value[keyPath: keyPath]
+        unwrapped[keyPath: keyPath]
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> Validated<U> {
-        try! .init(value[keyPath: keyPath])
+        try! .init(unwrapped[keyPath: keyPath])
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>>) -> U {
-        value[keyPath: keyPath].value!
+        unwrapped[keyPath: keyPath].value!
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>?>) -> Validated<U>? {
-        try! value[keyPath: keyPath].map(Validated<U>.init)
+        try! unwrapped[keyPath: keyPath].map(Validated<U>.init)
     }
 
     subscript<U>(dynamicMember keyPath: KeyPath<T, Decoded<U>?>) -> U? {
-        value[keyPath: keyPath]?.value!
+        unwrapped[keyPath: keyPath]?.value!
     }
 }
 
-public extension Validated where T: Sequence {
-    func unwrapped<U>() -> [U] where T.Element == Decoded<U> {
-        try! value.unwrapped()
+public extension Validated where T: Sequence, T.Element: Unwrappable {
+    /// Unwraps the elements of the sequence of `Decoded` values as an `Array` of pure values.
+    var unwrapped: [T.Element.Unwrapped] {
+        try! unwrapped.unwrapped
     }
 }
 
-public extension Validated {
-    func unwrapped<Key, Value>() -> [Key: Value] where T == [Key: Decoded<Value>] {
-        try! value.unwrapped()
+public extension Validated where T: Unwrappable {
+    var unwrapped: T.Unwrapped {
+        try! unwrapped.unwrapped
     }
 }
 

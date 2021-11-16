@@ -1,6 +1,6 @@
 import Decoded
 
-public struct KeyedFailure {
+struct KeyedFailure {
     let codingPath: CodingPath
     let failure: ValidationFailure
 }

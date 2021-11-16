@@ -4,9 +4,9 @@ import XCTest
 
 final class ValidatedTests: ValidationsTestCase {
     func test_singleValue() throws {
-        let decoded: Decoded<DecodedValueWrapper<Int>> = try decode("0")
+        let decoded: Decoded<Int> = try decode("0")
         let validated = try decoded.validated()
-        XCTAssertEqual(validated.value, 0)
+        XCTAssertEqual(validated.unwrapped, 0)
     }
 
     func test_directPropertyAccess() throws {
@@ -44,22 +44,23 @@ final class ValidatedTests: ValidationsTestCase {
         }
     }
 
-    func test_nameConflictWithState() throws {
-        struct City: Decodable {
-            struct State: Decodable {
-                var name: Decoded<String>
+    /// Tests a workaround for the edge case of a payload with `unwrapped` as a key which conflicts with ``Validated.unwrapped``.
+    func test_nameConflictWithUnwrapped() throws {
+        struct Package: Decodable {
+            enum CodingKeys: String, CodingKey {
+                case _unwrapped = "unwrapped"
             }
-            var state: Decoded<State>
+            var _unwrapped: Decoded<String>
         }
-        let decoded: Decoded<City> = try decode(#"{"state":{"name":"NY"}}"#)
+        let decoded: Decoded<Package> = try decode(#"{"unwrapped":"NY"}"#)
         let validated = try decoded.validated()
-        XCTAssertEqual(validated.state.name, "NY")
-        XCTAssertEqual(validated.state.codingPath, ["state"])
+        XCTAssertEqual(validated._unwrapped, "NY")
+        XCTAssertEqual(validated._unwrapped.codingPath, ["unwrapped"])
     }
 
     func test_directDecoding() throws {
-        let decoded: Validated<DecodedValueWrapper<Int>> = try decode("1")
-        XCTAssertEqual(decoded.value, 1)
+        let decoded: Validated<Int> = try decode("1")
+        XCTAssertEqual(decoded.unwrapped, 1)
     }
 
     func test_array() throws {
@@ -69,7 +70,7 @@ final class ValidatedTests: ValidationsTestCase {
         XCTAssertEqual(validated.first, 1)
         XCTAssertEqual(validated.first?.value, 1)
 
-        XCTAssertEqual(validated.unwrapped(), [1,2,3])
+        XCTAssertEqual(validated.unwrapped, [1,2,3])
     }
 
     func test_dictionary() throws {
@@ -77,6 +78,6 @@ final class ValidatedTests: ValidationsTestCase {
         XCTAssertEqual(validated.count, 1)
         XCTAssertEqual(validated["a"], 1)
 
-        XCTAssertEqual(validated.unwrapped(), ["a": 1])
+        XCTAssertEqual(validated.unwrapped, ["a": 1])
     }
 }

@@ -1,25 +1,26 @@
 import Decoded
 
-public typealias KeyedFailures = KeyedValues<ValidationFailure>
-
 public struct KeyedValues<T> {
-    public private(set) var value: [CodingPath: [T]]
+    public let value: [CodingPath: [T]]
 
     private init(_ value: [CodingPath: [T]]) {
         self.value = value
     }
 }
 
+/// Represents an unsuccessful validation with one or more ``ValidationFailure`` values per `CodingPath`.
+public typealias KeyedFailures = KeyedValues<ValidationFailure>
+
 extension KeyedFailures: Error {}
 
 extension KeyedFailures {
     init(codingPath: CodingPath, failure: T) {
-        self.value = [codingPath: [failure]]
+        self.init([codingPath: [failure]])
     }
 
     mutating func merge(_ other: KeyedFailuresRepresentable?) {
         guard let other = other?.keyedFailures else { return }
-        value.merge(other.value, uniquingKeysWith: +)
+        self = .init(value.merging(other.value, uniquingKeysWith: +))
     }
 
     public func mapFailures<U>(_ transform: (T) -> U) -> KeyedValues<U> {

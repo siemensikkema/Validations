@@ -4,8 +4,8 @@ import XCTest
 
 final class ValidatorTests: ValidationsTestCase {
     func test_basic_validator_success() throws {
-        let decoded: Decoded<DecodedValueWrapper<Int>> = try decode("0")
-        let validator = Validator<DecodedValueWrapper<Int>>(\.value) { (value: KeyedSuccess) in
+        let decoded: Decoded<Int> = try decode("0")
+        let validator = Validator<Int> { (value: KeyedSuccess) in
             nil
         }
         XCTAssertNoThrow(try decoded.validated(by: validator))
@@ -57,9 +57,9 @@ final class ValidatorTests: ValidationsTestCase {
 
             Validator {
                 \.name != \.email
-            }.or {
+            }.or(Validator {
                 \.name == "ab@b.com"
-            }
+            })
 
             Validator(withValueAt: \.name) { name in
                 \.email != name
@@ -82,7 +82,7 @@ final class ValidatorTests: ValidationsTestCase {
         } catch let failures as KeyedFailures {
             let presentable = PresentableFailures(failures)
             print(presentable)
-            XCTAssertEqual(presentable.value.count, 3)
+            XCTAssertEqual(presentable.value.count, 4)
         }
     }
 }
@@ -100,4 +100,3 @@ struct User: Decodable {
     var name: Decoded<String>
     var address: Decoded<Address>
 }
-

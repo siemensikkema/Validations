@@ -1,8 +1,9 @@
 import Decoded
 
+/// The result of a successful decoding attempt together with its `CodingPath`.
 public struct KeyedSuccess<T> {
-    let codingPath: CodingPath
-    let success: DecodingSuccess<T>
+    public let codingPath: CodingPath
+    public let success: DecodingSuccess<T>
 }
 
 extension KeyedSuccess {
