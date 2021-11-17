@@ -1,5 +1,5 @@
 # Validations
 
-A Swift library for validating Decodable data in an expressive and type-safe way.
+Type-safe and composable validations with versatile output.
 
 See the [full documentation](https://validations.siemensikkema.nl). 
