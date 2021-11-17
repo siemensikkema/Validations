@@ -3,7 +3,7 @@ import XCTest
 import Validations
 
 final class KeyedFailuresTests: ValidationsTestCase {
-    func test_errorOutput() throws {
+    func test_annotatingFailuresWithErrorCodes() throws {
         do {
             let decoded: Decoded<Post> = try decode("""
             {

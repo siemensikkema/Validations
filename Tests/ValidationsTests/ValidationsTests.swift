@@ -2,7 +2,6 @@ import Decoded
 import Validations
 import XCTest
 
-/// Examples of real-world use-cases
 final class ValidationsTests: ValidationsTestCase {
     /// Demonstrates how to validate a password reset scenario.
     func test_passwordReset() throws {
@@ -37,13 +36,19 @@ final class ValidationsTests: ValidationsTestCase {
             }
             XCTAssertEqual(validated.newPassword, "secret2")
         } catch let failures as KeyedFailures {
-            let presentable = PresentableFailures(failures)
-            XCTFail(presentable.description)
+            let descriptions = failures.mapFailures(String.init(describing:))
+
+            XCTAssertEqual(descriptions.value, [
+                ["email"]: ["Invalid credentials."],
+                ["newPassword"]: ["Is not contained in the expected range."]
+            ])
         }
     }
 }
 
-fileprivate struct InvalidCredentials: ValidationFailure {}
+fileprivate struct InvalidCredentials: CustomStringConvertible, ValidationFailure {
+    let description = "Invalid credentials."
+}
 
 fileprivate func verifyCredentials(for email: String?, password: String?) -> ValidationFailure? {
     guard let _ = email, let _ = password else {
@@ -53,4 +58,10 @@ fileprivate func verifyCredentials(for email: String?, password: String?) -> Val
     // in a real implementation we'd look the credentials for the email and verify the password against the stored hash
 
     return InvalidCredentials()
+}
+
+extension InRange.Failure: CustomStringConvertible {
+    public var description: String {
+        "Is not contained in the expected range."
+    }
 }

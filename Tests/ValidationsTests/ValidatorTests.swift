@@ -21,8 +21,9 @@ final class ValidatorTests: ValidationsTestCase {
         do {
             _ = try decoded.validated()
         } catch let failures as KeyedFailures {
-            let presentable = PresentableFailures(failures)
-            print(presentable)
+            let descriptions = failures.mapFailures(String.init(describing:))
+
+            XCTAssertEqual(descriptions.value, [["name"]: ["Value not found."]])
         }
     }
 
@@ -41,9 +42,9 @@ final class ValidatorTests: ValidationsTestCase {
         }
         """.data(using: .utf8)!
 
-        struct TestFailure: ValidationFailure, PresentableFailure {
-            var presentableDescription: String {
-                "customized!"
+        struct TestFailure: CustomStringConvertible, ValidationFailure {
+            var description: String {
+                "test"
             }
         }
 
@@ -80,9 +81,14 @@ final class ValidatorTests: ValidationsTestCase {
             let name: String = validated.name
             print(name)
         } catch let failures as KeyedFailures {
-            let presentable = PresentableFailures(failures)
-            print(presentable)
-            XCTAssertEqual(presentable.value.count, 4)
+            let descriptions = failures.mapFailures(String.init(describing:))
+
+            XCTAssertEqual(descriptions.value, [
+                ["name"]: ["'a@b.com' does not equal 'asd'."],
+                ["address", "street"]: ["'a' does not equal 'a@b.com'."],
+                ["email"]: ["Is not a valid email address."],
+                ["address", "line2"]: ["test"]
+            ])
         }
     }
 }
@@ -99,4 +105,31 @@ struct User: Decodable {
     var email: Decoded<String>
     var name: Decoded<String>
     var address: Decoded<Address>
+}
+
+extension DecodingFailure: CustomStringConvertible {
+    public var description: String {
+        switch self.errorType {
+        case .dataCorrupted:
+            return "Data corrupted."
+        case .keyNotFound:
+            return "Key not found."
+        case .typeMismatch:
+            return "Type mismatch."
+        case .valueNotFound:
+            return "Value not found."
+        }
+    }
+}
+
+extension IsEqual.Failure: CustomStringConvertible {
+    public var description: String {
+        "'\(lhs)' does not equal '\(rhs)'."
+    }
+}
+
+extension ValidEmail.Failure: CustomStringConvertible {
+    public var description: String {
+        "Is not a valid email address."
+    }
 }
