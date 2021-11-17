@@ -5,8 +5,7 @@ import XCTest
 /// Examples of real-world use-cases
 final class ValidationsTests: ValidationsTestCase {
     /// Demonstrates how to validate a password reset scenario.
-    @available(macOS 12.0.0, *)
-    func test_passwordReset() async throws {
+    func test_passwordReset() throws {
         struct ResetPasswordPayload: Decodable {
             let email: Decoded<String>
             let password: Decoded<String>
@@ -24,7 +23,8 @@ final class ValidationsTests: ValidationsTestCase {
         """
         let payload: Decoded<ResetPasswordPayload> = try decode(data)
 
-        let credentialFailure = await verifyCredentials(for: payload.email.value, password: payload.password.value)
+        // in a real-world scenario, this would be an async call
+        let credentialFailure = verifyCredentials(for: payload.email.value, password: payload.password.value)
 
         do {
             let validated = try payload.validated {
@@ -45,8 +45,7 @@ final class ValidationsTests: ValidationsTestCase {
 
 fileprivate struct InvalidCredentials: ValidationFailure {}
 
-@available(macOS 12.0.0, *)
-fileprivate func verifyCredentials(for email: String?, password: String?) async -> ValidationFailure? {
+fileprivate func verifyCredentials(for email: String?, password: String?) -> ValidationFailure? {
     guard let _ = email, let _ = password else {
         return nil
     }
