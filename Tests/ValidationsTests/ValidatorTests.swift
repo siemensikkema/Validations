@@ -23,7 +23,11 @@ final class ValidatorTests: ValidationsTestCase {
         } catch let failures as KeyedFailures {
             let descriptions = failures.mapFailures(String.init(describing:))
 
+            #if os(Linux)
+            XCTAssertEqual(descriptions.value, [["name"]: ["Type mismatch."]])
+            #else
             XCTAssertEqual(descriptions.value, [["name"]: ["Value not found."]])
+            #endif
         }
     }
 
