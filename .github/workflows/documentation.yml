@@ -18,6 +18,7 @@ jobs:
         run: |
           git fetch --no-tags --prune --no-recurse-submodules origin docc
           git switch docc
+          rm -rf docs.doccarchive
           mv -f ../DerivedData/Build/Products/Debug/Validations.doccarchive docs.doccarchive
           rm -rf ../DerivedData
           git add docs.doccarchive
