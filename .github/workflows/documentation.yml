@@ -17,7 +17,7 @@ jobs:
       - run: git fetch origin docc
       - run: git checkout FETCH_HEAD
       - run: git switch docc
-      - run: mv -f ../DerivedData/Build/Products/Debug/*.doccarchive docs.doccarchive
+      - run: mv -f ../DerivedData/Build/Products/Debug/Validations.doccarchive docs.doccarchive
       - run: rm -rf ../DerivedData
       - run: git add docs.doccarchive
       - run: git commit -m "Update documentation"
