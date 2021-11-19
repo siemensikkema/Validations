@@ -15,7 +15,7 @@ jobs:
       - name: Build docs
         run: xcodebuild docbuild -scheme "Validations" -destination 'platform=macOS,arch=x86_64' -derivedDataPath ../DerivedData
       - name: Publish docs
-      - run: |
+        run: |
           git fetch --no-tags --prune --no-recurse-submodules origin docc
           git switch docc
           mv -f ../DerivedData/Build/Products/Debug/Validations.doccarchive docs.doccarchive
@@ -24,4 +24,3 @@ jobs:
           git commit -m "Update documentation"
           git push
           git switch - || git checkout -
-            
