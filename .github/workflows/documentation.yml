@@ -14,12 +14,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Build docs
         run: xcodebuild docbuild -scheme "Validations" -destination 'platform=macOS,arch=x86_64' -derivedDataPath ../DerivedData
-      - run: git fetch origin docc
-      - run: git checkout FETCH_HEAD
-      - run: git switch docc
-      - run: mv -f ../DerivedData/Build/Products/Debug/Validations.doccarchive docs.doccarchive
-      - run: rm -rf ../DerivedData
-      - run: git add docs.doccarchive
-      - run: git commit -m "Update documentation"
-      - run: git push
-      - run: git switch main
+      - name: Publish docs
+      - run: |
+          git fetch --no-tags --prune --no-recurse-submodules origin docc
+          git switch docc
+          mv -f ../DerivedData/Build/Products/Debug/Validations.doccarchive docs.doccarchive
+          rm -rf ../DerivedData
+          git add docs.doccarchive
+          git commit -m "Update documentation"
+          git push
+          git switch - || git checkout -
+            
