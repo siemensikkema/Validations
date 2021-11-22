@@ -10,7 +10,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/siemensikkema/Decoded.git", from: "0.4.0")
+        .package(url: "https://github.com/siemensikkema/Decoded.git", from: "0.5.0")
     ],
     targets: [
         .target(
