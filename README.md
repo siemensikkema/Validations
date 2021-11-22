@@ -6,8 +6,6 @@
 
 Type-safe and composable validations with versatile output.
 
-See the [full documentation](https://validations.siemensikkema.nl). 
-
 # Installation
 
 Add `Validations` to your `Package.swift` file.
@@ -35,3 +33,6 @@ Import `Decoded` and `Validations` to any file you want to use this library in.
 import Decoded
 import Validations
 ```
+
+# Documentation
+This library's documentation is created using [DocC](https://developer.apple.com/documentation/docc) and can be found [here](https://validations.siemensikkema.nl).
