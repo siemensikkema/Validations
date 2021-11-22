@@ -70,7 +70,7 @@ public extension Validator {
         validate: @escaping (KeyedSuccess<U>) -> ValidationFailure?
     ) {
         self.init { decoded in
-            decoded.value?[keyPath: keyPath].keyedSuccess
+            decoded.flatMap(keyPath).keyedSuccess
         } validate: { _, success in
             validate(success)
         }
@@ -155,7 +155,7 @@ public extension Validator {
         self.init { (decoded: Decoded<T>) in
             let nested = decoded.flatMap(keyPath)
 
-            guard nested.success != nil else { return nil }
+            guard nested.result.success != nil else { return nil }
 
             return validator(nested)
         }

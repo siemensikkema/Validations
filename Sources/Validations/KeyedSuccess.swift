@@ -14,6 +14,6 @@ extension KeyedSuccess {
 
 extension Decoded {
     var keyedSuccess: KeyedSuccess<T>? {
-        success.map { KeyedSuccess(codingPath: codingPath, success: $0) }
+        result.success.map { KeyedSuccess(codingPath: codingPath, success: $0) }
     }
 }
